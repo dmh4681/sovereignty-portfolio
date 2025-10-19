@@ -19,6 +19,8 @@ const ConsultingPage = () => {
     { name: 'Services', href: '#services' },
     { name: 'Case Studies', href: '#case-studies' },
     { name: 'About', href: '#about' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'FAQ', href: '#faq' },
     { name: 'Contact', href: '#contact' }
   ];
 
@@ -461,7 +463,7 @@ const ConsultingPage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold mb-4 text-center">Transparent Pricing</h2>
           <p className="text-slate-400 text-center mb-12 max-w-2xl mx-auto">
@@ -530,7 +532,7 @@ const ConsultingPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/50">
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/50">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold mb-4 text-center">Frequently Asked Questions</h2>
           <p className="text-slate-400 text-center mb-12">
