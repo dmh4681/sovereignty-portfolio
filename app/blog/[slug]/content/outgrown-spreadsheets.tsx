@@ -28,9 +28,10 @@ export function OutgrownSpreadsheetsContent() {
       </p>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold mb-2">Real Example:</p>
+        <p className="font-semibold mb-2">Example Scenario:</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="text-slate-300">
-          A client was consolidating 8 QuickBooks entities every month using a master spreadsheet. Only their VP of Finance knew how it worked. When she left, it took them 3 weeks to recreate the logic. Cost: 120+ hours and one very unhappy CFO.
+          A company was consolidating 8 QuickBooks entities every month using a master spreadsheet. Only their VP of Finance knew how it worked. When she left, it took them 3 weeks to recreate the logic. Cost: 120+ hours and one very unhappy CFO.
         </p>
       </div>
 

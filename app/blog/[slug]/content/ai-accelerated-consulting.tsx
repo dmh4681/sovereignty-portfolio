@@ -23,7 +23,8 @@ export function AIAcceleratedConsultingContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-red-500 p-6 my-8">
-        <p className="font-semibold mb-2">A Real Example:</p>
+        <p className="font-semibold mb-2">Example Scenario:</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="text-slate-300 text-sm">
           A mid-market company paid $80,000 for a &quot;digital transformation strategy&quot; from a Big 4 firm. Deliverable: A 200-page PowerPoint deck recommending they modernize their systems. Timeline: 4 months. Implementation support: $0 (that would be a separate engagement). Outcome: The deck gathered dust. Nothing changed.
         </p>

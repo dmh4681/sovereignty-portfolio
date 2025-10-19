@@ -40,10 +40,11 @@ export function PowerBIvsCustomContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Example: The $180K Mistake</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The $180K Mistake</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
-          A client spent $180K on a Power BI implementation for their customer portal. Customers
-          hated it—too slow, looked generic, didn&apos;t match their workflows. We rebuilt it custom
+          A company spent $180K on a Power BI implementation for their customer portal. Customers
+          hated it—too slow, looked generic, didn&apos;t match their workflows. They rebuilt it custom
           in React + Python for $35K. Load times dropped from 8 seconds to under 1 second. Customer
           satisfaction scores jumped 40 points. The lesson? Don&apos;t force Power BI into customer-facing
           use cases.
@@ -209,10 +210,11 @@ export function PowerBIvsCustomContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Example: Finance Team Hybrid</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: Finance Team Hybrid</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
           A PE-backed finance team needed two things: (1) executives wanted to explore portfolio
-          company performance, and (2) portfolio CFOs needed clean monthly board packets. We built
+          company performance, and (2) portfolio CFOs needed clean monthly board packets. They built
           Power BI for the exploration use case—worked great for the 8 people who actually used it.
           Then custom automated reports for the 40 portfolio companies—templates, calculations,
           PDF generation, email delivery. Total cost: $45K. Time saved: 60 hours/month. ROI: 3 months.

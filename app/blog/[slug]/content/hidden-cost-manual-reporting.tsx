@@ -37,13 +37,14 @@ export function HiddenCostManualReportingContent() {
       </p>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Example: The Month That Wouldn&apos;t End</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Month That Wouldn&apos;t End</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
           A portfolio company CFO spent 60 hours on their October board deck because a data vendor
           changed their export format mid-month. Every formula broke. Every chart needed manual
           adjustment. The deck was late, the CEO was furious, and the CFO worked a weekend.
           That&apos;s $3,000 in labor for one month, plus the intangible cost of looking incompetent
-          to the board. We automated it for $8K. Never happened again.
+          to the board. Automating it for $8K would have prevented this entirely.
         </p>
       </div>
 
@@ -94,7 +95,8 @@ export function HiddenCostManualReportingContent() {
       </ul>
 
       <div className="bg-orange-500/10 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">The $2M Pricing Error</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The $2M Pricing Error</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
           A SaaS company used a manual spreadsheet to calculate customer renewal pricing. A formula
           error gave 40 customers a 20% discount they shouldn&apos;t have received. Caught it eight
@@ -160,14 +162,15 @@ export function HiddenCostManualReportingContent() {
       </p>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Example: The Acquisition That Broke Everything</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Acquisition That Broke Everything</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
           A PE-backed company acquired three competitors in 18 months. Each acquisition added
           another set of spreadsheets, another chart of accounts to reconcile, another data format
           to wrangle. The finance team went from 2 people to 5 people, still couldn&apos;t keep up,
-          and the CFO was spending 80% of their time on reporting instead of strategy. We automated
-          the consolidation and reporting. Headcount went back to 2.5 people, reports went from
-          3 weeks late to available next-day.
+          and the CFO was spending 80% of their time on reporting instead of strategy. Automating
+          the consolidation and reporting would bring headcount back down while delivering next-day reports
+          instead of being 3 weeks late.
         </p>
       </div>
 
@@ -199,13 +202,14 @@ export function HiddenCostManualReportingContent() {
       </p>
 
       <div className="bg-orange-500/10 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">The Question That Changed Everything</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Question That Changed Everything</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
-          A client couldn&apos;t easily see profitability by customer cohort—their spreadsheets
-          weren&apos;t set up for it, and manually segmenting would take days. Once we automated
-          it, they discovered that customers acquired through Channel A had 3x higher LTV than
-          Channel B, despite Channel B having better initial conversion. They shifted $500K in
-          marketing spend. ROI on that one insight: probably 10x their investment in automation.
+          A company couldn&apos;t easily see profitability by customer cohort—their spreadsheets
+          weren&apos;t set up for it, and manually segmenting would take days. Once automated,
+          they could discover that customers acquired through Channel A had 3x higher LTV than
+          Channel B, despite Channel B having better initial conversion. Shifting $500K in
+          marketing spend based on this insight could deliver 10x ROI on the automation investment.
         </p>
       </div>
 
@@ -302,9 +306,10 @@ export function HiddenCostManualReportingContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Project: Board Deck Automation</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: Board Deck Automation</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p>
-          <strong>Client:</strong> $30M revenue PE-backed services company<br />
+          <strong>Company:</strong> $30M revenue PE-backed services company<br />
           <strong>Problem:</strong> CFO spending 20 hours/month on board deck, different portfolio
           companies had different formats, constant manual reconciliation<br />
           <strong>Solution:</strong> Automated data consolidation, template generation, PDF creation<br />
@@ -312,7 +317,7 @@ export function HiddenCostManualReportingContent() {
           <strong>Time saved:</strong> 18 hours/month<br />
           <strong>Annual savings:</strong> $36K in labor + $60K in opportunity cost = $96K<br />
           <strong>Payback period:</strong> 3.5 months<br />
-          <strong>Bonus:</strong> Reports now available 3 days after month close instead of 15 days
+          <strong>Bonus:</strong> Reports available 3 days after month close instead of 15 days
         </p>
       </div>
 

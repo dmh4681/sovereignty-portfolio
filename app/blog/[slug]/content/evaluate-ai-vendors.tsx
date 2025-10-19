@@ -57,11 +57,12 @@ export function EvaluateAIVendorsContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">Real Example: The Invoice Processing Disaster</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Invoice Processing Disaster</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
           A client almost bought an AI invoice processing tool. The demo was perfect—extracted
-          every field flawlessly. I asked to see production accuracy on invoices from construction
-          subcontractors (the client&apos;s use case). Vendor hemmed and hawed. Turned out their
+          every field flawlessly. When asked to see production accuracy on invoices from construction
+          subcontractors (the client&apos;s use case), the vendor hemmed and hawed. Turned out their
           system worked great on standardized invoices from big companies, but accuracy dropped
           to 60% on the handwritten, inconsistent formats construction subs send. Would have been
           a $120K waste.
@@ -163,11 +164,12 @@ export function EvaluateAIVendorsContent() {
       </ul>
 
       <div className="bg-orange-500/10 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">The Competitive Intelligence Leak</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Competitive Intelligence Leak</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
-          A client in a competitive industry almost used an AI vendor whose TOS allowed them to
-          train on customer data. The vendor had three of the client&apos;s direct competitors as
-          customers. That means the client&apos;s data (pricing, customer patterns, strategic
+          A company in a competitive industry almost used an AI vendor whose TOS allowed them to
+          train on customer data. The vendor had three of the company&apos;s direct competitors as
+          customers. That means the company&apos;s data (pricing, customer patterns, strategic
           initiatives) would have effectively been shared with competitors through the model.
           Always read the data usage terms.
         </p>
@@ -265,13 +267,14 @@ export function EvaluateAIVendorsContent() {
       </ul>
 
       <div className="bg-slate-800 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">The Per-Transaction Trap</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: The Per-Transaction Trap</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
-          A client signed with an AI vendor at $0.10 per transaction. Seemed cheap—they were
+          A company signed with an AI vendor at $0.10 per transaction. Seemed cheap—they were
           processing 10,000 transactions/month, so $1,000/month. Two years later, they&apos;d
           scaled to 500,000 transactions/month. Cost: $50,000/month = $600K/year. With no volume
-          discounts. They were locked in for another year. We rebuilt it custom for $40K, hosted
-          for $400/month. Paid for itself in one month.
+          discounts. They were locked in for another year. Rebuilding it custom for $40K with
+          hosting at $400/month would pay for itself in one month.
         </p>
       </div>
 
@@ -430,13 +433,14 @@ export function EvaluateAIVendorsContent() {
       </ul>
 
       <div className="bg-orange-500/10 border-l-4 border-orange-500 p-6 my-8">
-        <p className="font-semibold text-orange-400 mb-2">What References Actually Tell You</p>
+        <p className="font-semibold text-orange-400 mb-2">Example Scenario: What References Actually Tell You</p>
+        <p className="text-xs text-slate-500 mb-3 italic">(Hypothetical scenario based on common patterns)</p>
         <p className="mb-0">
-          I called references for a client evaluating an AI forecasting tool. Vendor said
+          References for a company evaluating an AI forecasting tool revealed discrepancies. Vendor said
           implementation takes 6 weeks. Three references all said it took 4-6 months and required
           significant data cleanup first. Vendor said accuracy was 95%. References said 70-80% on
-          their actual data. Still might have been worth it, but now we had realistic expectations
-          and negotiated price down 40% to account for longer implementation.
+          their actual data. Still might have been worth it, but realistic expectations allowed
+          negotiating price down 40% to account for longer implementation.
         </p>
       </div>
 

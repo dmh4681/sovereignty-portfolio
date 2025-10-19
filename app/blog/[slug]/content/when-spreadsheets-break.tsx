@@ -2,9 +2,9 @@ export function WhenSpreadsheetsBreakContent() {
   return (
     <article className="prose prose-invert max-w-none">
       <p className="text-xl text-slate-300 mb-8">
-        Spreadsheets are great until they&apos;re not. Here are four real stories of spreadsheet
+        Spreadsheets are great until they&apos;re not. Here are four stories of spreadsheet
         failures that cost companies hundreds of thousands—sometimes millions—and what you can
-        learn from their mistakes. Names changed, numbers real.
+        learn from their mistakes. These are hypothetical scenarios based on common patterns I&apos;ve observed.
       </p>
 
       <h2>Story 1: The Copy-Paste Catastrophe</h2>
