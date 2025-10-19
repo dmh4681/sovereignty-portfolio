@@ -105,19 +105,6 @@ export const blogPosts: BlogPost[] = [
     featured: false
   },
   {
-    slug: 'building-sovereignty-path',
-    title: 'Building The Sovereignty Path: A Technical Deep Dive',
-    subtitle: 'Architecture, Philosophy, and Implementation',
-    author: 'Dylan Heiney',
-    date: '2025-01-08',
-    readTime: '15 min read',
-    category: 'Case Study',
-    tags: ['Case Study', 'Technical Architecture', 'Product Development'],
-    seoKeywords: ['custom application development', 'Python development', 'product architecture'],
-    excerpt: 'A technical walkthrough of building a comprehensive habit tracking system from philosophy to production, including architecture decisions and lessons learned.',
-    featured: false
-  },
-  {
     slug: 'when-spreadsheets-break',
     title: 'What Happens When Your Spreadsheets Break?',
     subtitle: 'Real Stories from the Front Lines',

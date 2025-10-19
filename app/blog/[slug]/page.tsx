@@ -12,7 +12,6 @@ import { SovereigntyManifestoContent } from './content/sovereignty-manifesto';
 import { PowerBIvsCustomContent } from './content/power-bi-vs-custom-development';
 import { HiddenCostManualReportingContent } from './content/hidden-cost-manual-reporting';
 import { EvaluateAIVendorsContent } from './content/evaluate-ai-vendors';
-import { BuildingSovereigntyPathContent } from './content/building-sovereignty-path';
 import { WhenSpreadsheetsBreakContent } from './content/when-spreadsheets-break';
 
 // Map slugs to content components
@@ -24,7 +23,6 @@ const contentComponents: Record<string, React.ComponentType> = {
   'power-bi-vs-custom-development': PowerBIvsCustomContent,
   'hidden-cost-manual-reporting': HiddenCostManualReportingContent,
   'evaluate-ai-vendors': EvaluateAIVendorsContent,
-  'building-sovereignty-path': BuildingSovereigntyPathContent,
   'when-spreadsheets-break': WhenSpreadsheetsBreakContent,
 };
 
