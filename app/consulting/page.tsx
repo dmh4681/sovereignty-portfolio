@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ChevronRight, Mail } from 'lucide-react';
 import Link from 'next/link';
+import ROICalculator from '../components/ROICalculator';
 
 const ConsultingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -275,6 +276,20 @@ const ConsultingPage = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ROI Calculator Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Calculate Your ROI</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              See how much time and money automation could save your organization.
+              Adjust the inputs to match your situation and get instant results.
+            </p>
+          </div>
+          <ROICalculator />
         </div>
       </section>
 
