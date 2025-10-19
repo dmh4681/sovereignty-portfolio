@@ -126,7 +126,7 @@ export function SpreadsheetsLandingPage() {
       <footer className="bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-slate-400 mb-2">
-            © 2025 Sovereignty Tracker
+            © 2025 Sovereign Path LLC
           </p>
           <p className="text-slate-500 text-sm">
             No spam, ever. Unsubscribe anytime.
@@ -255,7 +255,7 @@ export function AIGuideLandingPage() {
       <footer className="bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-slate-400 mb-2">
-            © 2025 Sovereignty Tracker
+            © 2025 Sovereign Path LLC
           </p>
           <p className="text-slate-500 text-sm">
             No spam, ever. Unsubscribe anytime.

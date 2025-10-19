@@ -735,7 +735,7 @@ const ConsultingPage = () => {
       <footer className="bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-slate-400 mb-2">
-            © 2025 Sovereignty Tracker. Built for clarity, designed for freedom.
+            © 2025 Sovereign Path LLC. Built for clarity, designed for freedom.
           </p>
           <p className="text-slate-500 text-sm italic">
             &ldquo;Sovereignty is measured not by what you own, but by how long you can say no.&rdquo;

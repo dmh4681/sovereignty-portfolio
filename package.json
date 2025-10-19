@@ -2,6 +2,7 @@
   "name": "sovereignty-portfolio",
   "version": "0.1.0",
   "private": true,
+  "author": "Dylan Heiney <dylan@sovereigntytracker.com>",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
