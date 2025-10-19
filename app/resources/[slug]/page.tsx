@@ -128,9 +128,18 @@ export function SpreadsheetsLandingPage() {
           <p className="text-slate-400 mb-2">
             © 2025 Sovereign Path LLC
           </p>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm mb-3">
             No spam, ever. Unsubscribe anytime.
           </p>
+          <div className="flex justify-center gap-4 text-slate-500 text-sm">
+            <Link href="/privacy" className="hover:text-orange-500 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">|</span>
+            <Link href="/terms" className="hover:text-orange-500 transition-colors">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
@@ -257,9 +266,18 @@ export function AIGuideLandingPage() {
           <p className="text-slate-400 mb-2">
             © 2025 Sovereign Path LLC
           </p>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm mb-3">
             No spam, ever. Unsubscribe anytime.
           </p>
+          <div className="flex justify-center gap-4 text-slate-500 text-sm">
+            <Link href="/privacy" className="hover:text-orange-500 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">|</span>
+            <Link href="/terms" className="hover:text-orange-500 transition-colors">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

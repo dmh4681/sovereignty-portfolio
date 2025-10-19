@@ -172,9 +172,18 @@ export default function BlogIndexPage() {
           <p className="text-slate-400 mb-2">
             © 2025 Sovereign Path LLC. Built for clarity, designed for freedom.
           </p>
-          <p className="text-slate-500 text-sm italic">
+          <p className="text-slate-500 text-sm italic mb-3">
             &ldquo;Sovereignty is measured not by what you own, but by how long you can say no.&rdquo;
           </p>
+          <div className="flex justify-center gap-4 text-slate-500 text-sm">
+            <Link href="/privacy" className="hover:text-orange-500 transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">|</span>
+            <Link href="/terms" className="hover:text-orange-500 transition-colors">
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
