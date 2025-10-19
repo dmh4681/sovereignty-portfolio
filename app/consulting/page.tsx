@@ -16,6 +16,7 @@ const ConsultingPage = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const navigation = [
+    { name: 'Blog', href: '/blog' },
     { name: 'Services', href: '#services' },
     { name: 'Case Studies', href: '#case-studies' },
     { name: 'About', href: '#about' },

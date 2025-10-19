@@ -12,6 +12,9 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <span className="text-xl font-bold text-orange-500">Sovereignty Tracker</span>
           <nav className="flex gap-6">
+            <Link href="/blog" className="text-slate-300 hover:text-orange-500 transition-colors">
+              Blog
+            </Link>
             <Link href="/consulting" className="text-slate-300 hover:text-orange-500 transition-colors">
               Consulting
             </Link>
