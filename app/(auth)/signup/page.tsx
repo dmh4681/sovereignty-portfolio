@@ -57,8 +57,18 @@ export default function SignupPage() {
         return;
       }
 
-      // Create profile in profiles table
+      // Wait a moment for the session to be established
       if (authData.user) {
+        // Get the session to ensure we're authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          setError('Account created, but session not established. Please try logging in.');
+          setLoading(false);
+          return;
+        }
+
+        // Create profile in profiles table (now with authenticated session)
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
