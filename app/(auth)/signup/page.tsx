@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
 
@@ -59,9 +60,9 @@ export default function SignupPage() {
 
       if (authData.user) {
         // Success! Profile was created automatically by database trigger
-        // Redirect to dashboard
-        router.push('/app/dashboard');
-        router.refresh();
+        // Show confirmation message (email verification required)
+        setShowConfirmation(true);
+        setLoading(false);
       }
     } catch {
       setError('An unexpected error occurred. Please try again.');
@@ -90,14 +91,34 @@ export default function SignupPage() {
             Create Your Account
           </h2>
 
-          <form onSubmit={handleSignup} className="space-y-5">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 flex items-start gap-3">
-                <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
-                <p className="text-red-300 text-sm">{error}</p>
+          {showConfirmation ? (
+            <div className="space-y-4">
+              <div className="bg-green-900/20 border border-green-700 rounded-lg p-6 text-center">
+                <CheckCircle size={48} className="text-green-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">Check Your Email!</h3>
+                <p className="text-slate-300 mb-4">
+                  We&apos;ve sent a confirmation email to <span className="font-semibold text-orange-400">{email}</span>
+                </p>
+                <p className="text-slate-400 text-sm">
+                  Please click the link in the email to verify your account before logging in.
+                </p>
               </div>
-            )}
+              <Link
+                href="/login"
+                className="block w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors text-center"
+              >
+                Go to Login
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-5">
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-red-300 text-sm">{error}</p>
+                </div>
+              )}
 
             {/* Full Name Input */}
             <div>
@@ -181,16 +202,19 @@ export default function SignupPage() {
               )}
             </button>
           </form>
+          )}
 
-          {/* Login Link */}
-          <div className="mt-6 text-center">
-            <p className="text-slate-400 text-sm">
-              Already have an account?{' '}
-              <Link href="/login" className="text-orange-500 hover:text-orange-400 font-semibold transition-colors">
-                Sign in
-              </Link>
-            </p>
-          </div>
+          {/* Login Link - only show if not showing confirmation */}
+          {!showConfirmation && (
+            <div className="mt-6 text-center">
+              <p className="text-slate-400 text-sm">
+                Already have an account?{' '}
+                <Link href="/login" className="text-orange-500 hover:text-orange-400 font-semibold transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Back to Home Link */}
