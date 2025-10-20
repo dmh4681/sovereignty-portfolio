@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, Tag, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Tag } from 'lucide-react';
 import { getBlogPost, blogPosts } from '../blogData';
 import { Metadata } from 'next';
 

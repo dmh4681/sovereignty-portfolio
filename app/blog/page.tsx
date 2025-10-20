@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Clock, Tag } from 'lucide-react';
-import { blogPosts, BlogPost } from './blogData';
+import { Calendar } from 'lucide-react';
+import { blogPosts } from './blogData';
 
 export default function BlogIndexPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');

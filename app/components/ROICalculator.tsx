@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { Calculator, TrendingUp, Clock, DollarSign, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Calculator, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 
 export default function ROICalculator() {
   const [inputs, setInputs] = useState({
@@ -23,11 +23,7 @@ export default function ROICalculator() {
     threeYearROI: 0,
   });
 
-  useEffect(() => {
-    calculateROI();
-  }, [inputs]);
-
-  const calculateROI = () => {
+  const calculateROI = useCallback(() => {
     // Monthly time cost (hours × rate × team size)
     const monthlyTimeCost = inputs.hoursPerMonth * inputs.hourlyRate * inputs.teamSize;
 
@@ -63,7 +59,11 @@ export default function ROICalculator() {
       paybackMonths,
       threeYearROI,
     });
-  };
+  }, [inputs]);
+
+  useEffect(() => {
+    calculateROI();
+  }, [calculateROI]);
 
   const handleInputChange = (field: string, value: string) => {
     const numValue = parseFloat(value) || 0;
