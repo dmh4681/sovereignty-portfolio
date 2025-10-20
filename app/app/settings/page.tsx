@@ -23,7 +23,6 @@ interface Path {
   name: string;
   display_name: string;
   description: string;
-  icon: string;
 }
 
 const pathIcons: { [key: string]: string } = {
@@ -89,7 +88,7 @@ export default function SettingsPage() {
         // Load all paths
         const { data: allPaths, error: pathsError } = await supabase
           .from('paths')
-          .select('name, display_name, description, icon')
+          .select('name, display_name, description')
           .order('name', { ascending: true });
 
         if (pathsError) throw pathsError;
