@@ -33,7 +33,7 @@ export default function LoginPage() {
     }
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -41,11 +41,18 @@ export default function LoginPage() {
       if (authError) {
         setError(authError.message);
         setLoading(false);
-      } else {
-        router.push('/app/entry');
-        router.refresh();
+        return;
       }
-    } catch {
+
+      if (data.session) {
+        // Use window.location for a hard redirect to ensure cookies are set
+        window.location.href = '/app/entry';
+      } else {
+        setError('Login successful but no session created. Please try again.');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
