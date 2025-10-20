@@ -40,7 +40,7 @@ export default function SignupPage() {
     }
 
     try {
-      // Create auth user
+      // Create auth user (profile will be created automatically by database trigger)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -57,34 +57,9 @@ export default function SignupPage() {
         return;
       }
 
-      // Wait a moment for the session to be established
       if (authData.user) {
-        // Get the session to ensure we're authenticated
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (!session) {
-          setError('Account created, but session not established. Please try logging in.');
-          setLoading(false);
-          return;
-        }
-
-        // Create profile in profiles table (now with authenticated session)
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            email: email,
-            full_name: fullName,
-            selected_path: 'default'
-          });
-
-        if (profileError) {
-          setError(`Account created, but profile setup failed: ${profileError.message}`);
-          setLoading(false);
-          return;
-        }
-
-        // Success! Redirect to dashboard
+        // Success! Profile was created automatically by database trigger
+        // Redirect to dashboard
         router.push('/app/dashboard');
         router.refresh();
       }
