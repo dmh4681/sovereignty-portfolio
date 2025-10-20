@@ -47,7 +47,7 @@ export default function LoginPage() {
       if (data.session) {
         console.log('Login successful, session stored in localStorage');
         // Session is now in localStorage, safe to redirect
-        window.location.href = '/app/entry';
+        window.location.href = '/app/dashboard';
       } else {
         setError('Login successful but no session created. Please try again.');
         setLoading(false);

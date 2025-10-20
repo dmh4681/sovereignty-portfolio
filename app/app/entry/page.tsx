@@ -184,7 +184,7 @@ export default function DailyEntryPage() {
 
       // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {
-        router.push('/app/dashboard');
+        window.location.href = '/app/dashboard';
       }, 1500);
     } catch (err) {
       console.error('Error saving entry:', err);
@@ -455,7 +455,7 @@ export default function DailyEntryPage() {
 
         {success && (
           <div className="bg-green-900/20 border border-green-700 rounded-lg p-4 mb-6">
-            <p className="text-green-300 text-sm font-semibold">Entry saved successfully! Redirecting to dashboard...</p>
+            <p className="text-green-300 text-sm font-semibold">✅ Entry saved successfully! Redirecting to dashboard...</p>
           </div>
         )}
 
