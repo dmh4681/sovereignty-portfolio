@@ -45,8 +45,21 @@ export default function LoginPage() {
       }
 
       if (data.session) {
-        // Use window.location for a hard redirect to ensure cookies are set
-        window.location.href = '/app/entry';
+        console.log('Login successful, session created:', data.session.user.id);
+        // Wait a moment for cookies to be set, then redirect
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Try multiple redirect methods
+        router.refresh();
+        router.replace('/app/entry');
+
+        // Fallback to window.location after a delay
+        setTimeout(() => {
+          if (window.location.pathname !== '/app/entry') {
+            console.log('Router redirect failed, using window.location');
+            window.location.href = '/app/entry';
+          }
+        }, 500);
       } else {
         setError('Login successful but no session created. Please try again.');
         setLoading(false);
