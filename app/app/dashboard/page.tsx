@@ -243,6 +243,9 @@ export default function DashboardPage() {
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
+              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Settings
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
@@ -275,6 +278,9 @@ export default function DashboardPage() {
               </Link>
               <Link href="/app/paths" className="block text-slate-300">
                 Paths
+              </Link>
+              <Link href="/app/settings" className="block text-slate-300">
+                Settings
               </Link>
               <button
                 onClick={handleLogout}
