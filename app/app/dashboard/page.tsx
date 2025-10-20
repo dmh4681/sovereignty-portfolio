@@ -45,22 +45,37 @@ export default function DashboardPage() {
       new Date(b.entry_date).getTime() - new Date(a.entry_date).getTime()
     );
 
+    // Get today and yesterday
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Check if most recent entry is today or yesterday
+    const mostRecentEntry = new Date(sorted[0].entry_date);
+    mostRecentEntry.setHours(0, 0, 0, 0);
+
+    // If most recent entry is older than yesterday, streak is broken
+    if (mostRecentEntry < yesterday) {
+      return 0;
+    }
+
+    // Start counting from the most recent entry
     let streakCount = 0;
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
+    const expectedDate = new Date(mostRecentEntry);
 
     for (const entry of sorted) {
       const entryDate = new Date(entry.entry_date);
       entryDate.setHours(0, 0, 0, 0);
 
-      const daysDiff = Math.floor(
-        (currentDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (daysDiff === streakCount) {
+      // Check if this entry matches the expected date
+      if (entryDate.getTime() === expectedDate.getTime()) {
         streakCount++;
+        // Move expected date back one day
+        expectedDate.setDate(expectedDate.getDate() - 1);
       } else {
-        break; // Streak broken
+        break; // Streak broken - missing a day
       }
     }
 
