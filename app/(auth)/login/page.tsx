@@ -42,7 +42,7 @@ export default function LoginPage() {
         setError(authError.message);
         setLoading(false);
       } else {
-        router.push('/app/dashboard');
+        router.push('/app/entry');
         router.refresh();
       }
     } catch {

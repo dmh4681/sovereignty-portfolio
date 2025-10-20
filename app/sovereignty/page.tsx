@@ -148,14 +148,12 @@ const SovereigntyLandingPage = () => {
               Find Your Path
               <ArrowRight size={20} />
             </Link>
-            <a
-              href="https://thesovereigntypath.streamlit.app"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/signup"
               className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors border border-slate-700 inline-flex items-center justify-center gap-2"
             >
               Try the App
-            </a>
+            </Link>
           </div>
 
           {/* Social Proof */}
