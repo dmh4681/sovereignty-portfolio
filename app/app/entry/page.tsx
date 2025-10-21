@@ -5,8 +5,59 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateDailyScore, DailyActivities, PathConfig, getActivityPoints } from '@/lib/scoring';
-import { getTodayLocalDate } from '@/lib/utils/date';
-import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X } from 'lucide-react';
+import { getTodayLocalDate, formatDateForDisplay } from '@/lib/utils/date';
+import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X, Info } from 'lucide-react';
+import { getActivityDescription, ActivityDescription } from '@/lib/activity-descriptions';
+
+// Activity Tooltip Component
+interface ActivityTooltipProps {
+  activityId: string;
+}
+
+function ActivityTooltip({ activityId }: ActivityTooltipProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const description = getActivityDescription(activityId);
+
+  if (!description) return null;
+
+  return (
+    <div className="relative inline-block ml-2">
+      <button
+        type="button"
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-slate-400 hover:text-orange-500 transition-colors"
+        aria-label={`Info about ${description.title}`}
+      >
+        <Info size={16} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-6 z-50 w-80 max-w-[calc(100vw-2rem)] bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-2xl">
+          <h4 className="text-orange-500 font-semibold mb-2">{description.title}</h4>
+          <p className="text-slate-300 text-sm mb-3">{description.description}</p>
+
+          <div className="mb-3">
+            <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-1">Examples:</p>
+            <ul className="text-slate-300 text-xs space-y-1">
+              {description.examples.map((example, idx) => (
+                <li key={idx} className="flex items-start gap-1">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span>{example}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="border-t border-slate-700 pt-2">
+            <p className="text-orange-400 text-xs font-semibold">{description.points}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DailyEntryPage() {
   const [loading, setLoading] = useState(true);
@@ -308,6 +359,9 @@ export default function DailyEntryPage() {
               Daily Entry
             </h1>
             <p className="text-slate-400">
+              {formatDateForDisplay(getTodayLocalDate())}
+            </p>
+            <p className="text-slate-500 text-sm">
               Track your sovereignty activities for today
             </p>
           </div>
@@ -356,8 +410,12 @@ export default function DailyEntryPage() {
                 {/* Home-cooked meals */}
                 <div className="bg-slate-900 rounded-lg p-4">
                   <label className="block text-slate-300 font-medium mb-2">
-                    How many home-cooked meals? {activityPoints.home_cooked_meals && (
-                      <span className="text-orange-400 text-sm">({activityPoints.home_cooked_meals})</span>
+                    <span className="inline-flex items-center">
+                      How many home-cooked meals?
+                      <ActivityTooltip activityId="home_cooked_meals" />
+                    </span>
+                    {activityPoints.home_cooked_meals && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.home_cooked_meals})</span>
                     )}
                   </label>
                   <div className="flex gap-2">
@@ -380,8 +438,12 @@ export default function DailyEntryPage() {
                 {/* Exercise minutes */}
                 <div className="bg-slate-900 rounded-lg p-4">
                   <label htmlFor="exercise" className="block text-slate-300 font-medium mb-2">
-                    Exercise minutes today? {activityPoints.exercise_minutes && (
-                      <span className="text-orange-400 text-sm">({activityPoints.exercise_minutes})</span>
+                    <span className="inline-flex items-center">
+                      Exercise minutes today?
+                      <ActivityTooltip activityId="exercise_minutes" />
+                    </span>
+                    {activityPoints.exercise_minutes && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.exercise_minutes})</span>
                     )}
                   </label>
                   <input
@@ -403,9 +465,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setStrengthTraining(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you do strength training? {activityPoints.strength_training && (
-                      <span className="text-orange-400 text-sm">({activityPoints.strength_training})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you do strength training?
+                    <ActivityTooltip activityId="strength_training" />
+                    {activityPoints.strength_training && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.strength_training})</span>
                     )}
                   </span>
                 </label>
@@ -418,9 +482,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setJunkFood(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-red-500 focus:ring-red-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you eat junk food? {activityPoints.no_junk_food && (
-                      <span className="text-slate-500 text-sm">(checked = lose {activityPoints.no_junk_food})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you eat junk food?
+                    <ActivityTooltip activityId="no_junk_food" />
+                    {activityPoints.no_junk_food && (
+                      <span className="text-slate-500 text-sm ml-2">(checked = lose {activityPoints.no_junk_food})</span>
                     )}
                   </span>
                 </label>
@@ -438,9 +504,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setNoSpending(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    No unnecessary spending today? {activityPoints.no_spending && (
-                      <span className="text-orange-400 text-sm">({activityPoints.no_spending})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    No unnecessary spending today?
+                    <ActivityTooltip activityId="no_spending" />
+                    {activityPoints.no_spending && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.no_spending})</span>
                     )}
                   </span>
                 </label>
@@ -452,9 +520,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setInvestedBitcoin(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you invest in Bitcoin? {activityPoints.invested_bitcoin && (
-                      <span className="text-orange-400 text-sm">({activityPoints.invested_bitcoin})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you invest in Bitcoin?
+                    <ActivityTooltip activityId="invested_bitcoin" />
+                    {activityPoints.invested_bitcoin && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.invested_bitcoin})</span>
                     )}
                   </span>
                 </label>
@@ -472,9 +542,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setMeditation(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you meditate? {activityPoints.meditation && (
-                      <span className="text-orange-400 text-sm">({activityPoints.meditation})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you meditate?
+                    <ActivityTooltip activityId="meditation" />
+                    {activityPoints.meditation && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.meditation})</span>
                     )}
                   </span>
                 </label>
@@ -486,9 +558,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setGratitude(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you practice gratitude? {activityPoints.gratitude && (
-                      <span className="text-orange-400 text-sm">({activityPoints.gratitude})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you practice gratitude?
+                    <ActivityTooltip activityId="gratitude" />
+                    {activityPoints.gratitude && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.gratitude})</span>
                     )}
                   </span>
                 </label>
@@ -500,9 +574,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setReadOrLearned(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you read or learn something? {activityPoints.read_or_learned && (
-                      <span className="text-orange-400 text-sm">({activityPoints.read_or_learned})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you read or learn something?
+                    <ActivityTooltip activityId="read_or_learned" />
+                    {activityPoints.read_or_learned && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.read_or_learned})</span>
                     )}
                   </span>
                 </label>
@@ -520,9 +596,11 @@ export default function DailyEntryPage() {
                     onChange={(e) => setEnvironmentalAction(e.target.checked)}
                     className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
                   />
-                  <span className="text-slate-300 flex-1">
-                    Did you take environmental action? {activityPoints.environmental_action && (
-                      <span className="text-orange-400 text-sm">({activityPoints.environmental_action})</span>
+                  <span className="text-slate-300 flex-1 inline-flex items-center">
+                    Did you take environmental action?
+                    <ActivityTooltip activityId="environmental_action" />
+                    {activityPoints.environmental_action && (
+                      <span className="text-orange-400 text-sm ml-2">({activityPoints.environmental_action})</span>
                     )}
                   </span>
                 </label>
