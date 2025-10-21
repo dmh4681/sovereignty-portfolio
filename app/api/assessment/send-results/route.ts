@@ -153,7 +153,7 @@ ${secondPath.dailyPractices.slice(0, 3).map(p => `• ${p}`).join('\n')}
 🚀 READY TO START?
 
 Track your daily sovereignty score and build lasting habits:
-👉 https://thesovereigntypath.streamlit.app
+👉 https://sovereigntytracker.com/app/signup
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
