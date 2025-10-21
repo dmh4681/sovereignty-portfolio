@@ -85,6 +85,7 @@ export default function DailyEntryPage() {
   const [noSpending, setNoSpending] = useState(false);
   const [investedBitcoin, setInvestedBitcoin] = useState(false);
   const [bitcoinInvestmentAmount, setBitcoinInvestmentAmount] = useState(0);
+  const [originalBitcoinAmount, setOriginalBitcoinAmount] = useState(0); // Track original amount for updates
   const [meditation, setMeditation] = useState(false);
   const [gratitude, setGratitude] = useState(false);
   const [readOrLearned, setReadOrLearned] = useState(false);
@@ -153,7 +154,9 @@ export default function DailyEntryPage() {
           setJunkFood(existingEntry.junk_food || false);
           setNoSpending(existingEntry.no_spending || false);
           setInvestedBitcoin(existingEntry.invested_bitcoin || false);
-          setBitcoinInvestmentAmount(existingEntry.investment_amount_usd || 0);
+          const existingInvestment = existingEntry.investment_amount_usd || 0;
+          setBitcoinInvestmentAmount(existingInvestment);
+          setOriginalBitcoinAmount(existingInvestment); // Store original for delta calculation
           setMeditation(existingEntry.meditation || false);
           setGratitude(existingEntry.gratitude || false);
           setReadOrLearned(existingEntry.read_or_learned || false);
@@ -245,16 +248,33 @@ export default function DailyEntryPage() {
 
       if (upsertError) throw upsertError;
 
-      // If user invested Bitcoin, record it in their portfolio
+      // If user invested Bitcoin, record the DELTA (difference) in their portfolio
+      // This prevents double-counting when updating an existing entry
       if (investedBitcoin && bitcoinInvestmentAmount > 0) {
+        const investmentDelta = bitcoinInvestmentAmount - originalBitcoinAmount;
+
+        // Only record if there's a change in investment amount
+        if (investmentDelta !== 0) {
+          const investmentSuccess = await SovereigntyCalculator.recordInvestment(
+            userId,
+            investmentDelta,
+            new Date()
+          );
+
+          if (!investmentSuccess) {
+            console.warn('Bitcoin investment recorded in entry but failed to update portfolio');
+          }
+        }
+      } else if (!investedBitcoin && originalBitcoinAmount > 0) {
+        // If user unchecked Bitcoin investment, subtract the original amount
         const investmentSuccess = await SovereigntyCalculator.recordInvestment(
           userId,
-          bitcoinInvestmentAmount,
+          -originalBitcoinAmount,
           new Date()
         );
 
         if (!investmentSuccess) {
-          console.warn('Bitcoin investment recorded in entry but failed to update portfolio');
+          console.warn('Failed to remove Bitcoin investment from portfolio');
         }
       }
 
