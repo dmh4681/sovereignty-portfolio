@@ -73,11 +73,11 @@ const pathDetails = {
 
 export async function POST(request: Request) {
   try {
-    const { email, pathResult, secondaryPath } = await request.json();
+    const { email, name, pathResult, secondaryPath } = await request.json();
 
-    if (!email || !pathResult) {
+    if (!email || !name || !pathResult) {
       return NextResponse.json(
-        { error: 'Email and path result required' },
+        { error: 'Email, name, and path result required' },
         { status: 400 }
       );
     }
@@ -123,6 +123,8 @@ Keep it under 250 words.`
     const emailBody = `
 🛡️ YOUR SOVEREIGNTY PATH ASSESSMENT RESULTS
 
+Dear ${name},
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 YOUR PRIMARY PATH: ${primaryPath.name.toUpperCase()}
@@ -152,8 +154,8 @@ ${secondPath.dailyPractices.slice(0, 3).map(p => `• ${p}`).join('\n')}
 
 🚀 READY TO START?
 
-Track your daily sovereignty score and build lasting habits:
-👉 https://sovereigntytracker.com/app/signup
+Create your free account and start tracking your daily sovereignty:
+👉 https://www.sovereigntytracker.com/app/signup
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

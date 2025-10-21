@@ -338,6 +338,7 @@ const SovereigntyPathAssessment = () => {
   const [answers, setAnswers] = useState<{ [key: string]: number }>({});
   const [showResults, setShowResults] = useState(false);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAnswer = (optionIndex: number) => {
@@ -381,17 +382,18 @@ const SovereigntyPathAssessment = () => {
   };
 
   const handleEmailSubmit = async () => {
-    if (!email) return;
-    
+    if (!email || !name) return;
+
     setIsSubmitting(true);
     const result = calculatePath();
-    
+
     try {
       const response = await fetch('/api/assessment/send-results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
+          name,
           pathResult: result.primary,
           secondaryPath: result.secondary,
           scores: result.scores
@@ -443,6 +445,19 @@ const SovereigntyPathAssessment = () => {
             <p className="text-slate-400 text-center mb-6">
               Receive a detailed breakdown of your sovereignty path with daily practices, expert guidance, and actionable steps.
             </p>
+
+            {/* Name input field */}
+            <div className="mb-3">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your first name"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-orange-500"
+              />
+            </div>
+
+            {/* Email input field */}
             <div className="flex gap-3">
               <input
                 type="email"
@@ -453,7 +468,7 @@ const SovereigntyPathAssessment = () => {
               />
               <button
                 onClick={handleEmailSubmit}
-                disabled={!email || isSubmitting}
+                disabled={!email || !name || isSubmitting}
                 className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
               >
                 {isSubmitting ? 'Sending...' : (
