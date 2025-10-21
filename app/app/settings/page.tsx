@@ -52,7 +52,10 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState('');
 
   // Path switching state
-  const [selectedPath, setSelectedPath] = useState('default');
+  const [currentPath, setCurrentPath] = useState('default'); // Currently SAVED path
+  const [selectedPath, setSelectedPath] = useState('default'); // Dropdown selection
+  const [switching, setSwitching] = useState(false);
+  const [switchMessage, setSwitchMessage] = useState('');
 
   // Stats
   const [totalDays, setTotalDays] = useState(0);
@@ -83,6 +86,7 @@ export default function SettingsPage() {
 
         setProfile(userProfile);
         setFullName(userProfile.full_name || '');
+        setCurrentPath(userProfile.selected_path || 'default');
         setSelectedPath(userProfile.selected_path || 'default');
 
         // Load all paths
@@ -214,9 +218,9 @@ export default function SettingsPage() {
     if (!session) return;
 
     // Don't switch if it's the same path
-    if (selectedPath === profile?.selected_path) {
-      setMessage('You are already on this path');
-      setTimeout(() => setMessage(''), 3000);
+    if (selectedPath === currentPath) {
+      setSwitchMessage('You are already on this path');
+      setTimeout(() => setSwitchMessage(''), 3000);
       return;
     }
 
@@ -226,10 +230,14 @@ export default function SettingsPage() {
       `Switch to ${selectedPathObj?.display_name}?\n\nYour historical scores will remain, but future entries will use the new path's scoring system. This is a significant change - are you sure?`
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      // User cancelled - reset dropdown to current path
+      setSelectedPath(currentPath);
+      return;
+    }
 
-    setActionLoading(true);
-    setMessage('');
+    setSwitching(true);
+    setSwitchMessage('');
     setError('');
 
     try {
@@ -240,13 +248,18 @@ export default function SettingsPage() {
 
       if (updateError) throw updateError;
 
-      setMessage('Path switched successfully! Redirecting...');
+      // Update current path to match
+      setCurrentPath(selectedPath);
+      setSwitchMessage('Path switched successfully! Redirecting...');
+
       setTimeout(() => {
         window.location.reload();
       }, 1500);
     } catch (err) {
       setError('Failed to switch path: ' + (err instanceof Error ? err.message : 'Unknown error'));
-      setActionLoading(false);
+      // Reset dropdown on error
+      setSelectedPath(currentPath);
+      setSwitching(false);
     }
   };
 
@@ -321,7 +334,10 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <div className="text-center">
+          <Loader2 size={48} className="text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Loading your settings...</p>
+        </div>
       </div>
     );
   }
@@ -342,7 +358,6 @@ export default function SettingsPage() {
     );
   }
 
-  const currentPathObj = paths.find(p => p.name === profile?.selected_path);
   const selectedPathObj = paths.find(p => p.name === selectedPath);
 
   return (
@@ -554,20 +569,21 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {/* Current Path */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Current Path</label>
-              <div className="flex items-center text-lg text-slate-100">
-                <span className="text-2xl mr-2">{pathIcons[profile?.selected_path || 'default']}</span>
-                <span className="font-medium">{currentPathObj?.display_name || 'Default'}</span>
+              <label className="block text-sm text-slate-400 mb-2">Current Active Path</label>
+              <div className="flex items-center text-lg text-slate-100 bg-slate-900 border border-slate-700 rounded-lg p-4">
+                <span className="text-2xl mr-2">{pathIcons[currentPath || 'default']}</span>
+                <span className="font-medium">{paths.find(p => p.name === currentPath)?.display_name || 'Default'}</span>
               </div>
             </div>
 
             {/* Switch Path Dropdown */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Switch Path</label>
+              <label className="block text-sm text-slate-400 mb-2">Select Different Path</label>
               <select
                 value={selectedPath}
                 onChange={(e) => setSelectedPath(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:border-orange-500 focus:outline-none"
+                disabled={switching}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:border-orange-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {paths.map((path) => (
                   <option key={path.name} value={path.name}>
@@ -584,6 +600,26 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {/* Path Change Indicator */}
+            {selectedPath !== currentPath && (
+              <div className="bg-orange-900/20 border border-orange-700 rounded-lg p-4">
+                <p className="text-orange-300 text-sm font-medium">
+                  ⚠️ You&apos;ve selected a different path. Click &ldquo;Switch Path&rdquo; below to confirm the change.
+                </p>
+              </div>
+            )}
+
+            {/* Switch Message */}
+            {switchMessage && (
+              <div className={`rounded-lg p-4 ${
+                switchMessage.includes('success')
+                  ? 'bg-green-900/20 border border-green-700 text-green-300'
+                  : 'bg-slate-700 border border-slate-600 text-slate-300'
+              }`}>
+                <p className="text-sm">{switchMessage}</p>
+              </div>
+            )}
+
             {/* Note */}
             <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
               <p className="text-xs text-orange-400">
@@ -594,14 +630,16 @@ export default function SettingsPage() {
             {/* Switch Path Button */}
             <button
               onClick={handleSwitchPath}
-              disabled={actionLoading || selectedPath === profile?.selected_path}
-              className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-semibold transition-colors w-full flex items-center justify-center"
+              disabled={switching || selectedPath === currentPath}
+              className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors w-full flex items-center justify-center"
             >
-              {actionLoading ? (
+              {switching ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Switching...
+                  Switching Path...
                 </>
+              ) : selectedPath === currentPath ? (
+                'Currently Active Path'
               ) : (
                 'Switch to This Path'
               )}
