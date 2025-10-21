@@ -136,7 +136,7 @@ const PathModal = ({ path, isOpen, onClose }: PathModalProps) => {
                 Take Assessment
               </Link>
               <Link
-                href="/app/signup"
+                href="/signup"
                 className="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-center px-6 py-4 rounded-lg font-semibold transition-colors"
               >
                 Start Tracking Now
@@ -464,13 +464,13 @@ const SovereigntyLandingPage = () => {
 
             {/* App Access */}
             <Link
-              href="/app/login"
+              href="/login"
               className="text-slate-300 hover:text-orange-500 transition-colors font-medium"
             >
               Sign In
             </Link>
             <Link
-              href="/app/signup"
+              href="/signup"
               className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
             >
               Get Started
@@ -517,14 +517,14 @@ const SovereigntyLandingPage = () => {
               <div className="border-t border-slate-700 my-3" />
 
               <Link
-                href="/app/login"
+                href="/login"
                 className="block text-slate-300 hover:text-orange-500 py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Sign In
               </Link>
               <Link
-                href="/app/signup"
+                href="/signup"
                 className="block bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -565,13 +565,13 @@ const SovereigntyLandingPage = () => {
             </Link>
             <div className="flex gap-3 justify-center">
               <Link
-                href="/app/login"
+                href="/login"
                 className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-lg font-semibold transition-colors"
               >
                 Sign In
               </Link>
               <Link
-                href="/app/signup"
+                href="/signup"
                 className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors border border-slate-600"
               >
                 Sign Up
@@ -580,7 +580,7 @@ const SovereigntyLandingPage = () => {
           </div>
 
           <p className="text-slate-400 text-sm text-center">
-            Already tracking? <Link href="/app/login" className="text-orange-500 hover:text-orange-400 underline">Sign in here</Link>
+            Already tracking? <Link href="/login" className="text-orange-500 hover:text-orange-400 underline">Sign in here</Link>
           </p>
         </div>
       </section>

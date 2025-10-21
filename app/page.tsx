@@ -29,13 +29,13 @@ const HomePage = () => {
 
             {/* App Access */}
             <Link
-              href="/app/login"
+              href="/login"
               className="text-slate-300 hover:text-orange-500 transition-colors font-medium"
             >
               Sign In
             </Link>
             <Link
-              href="/app/signup"
+              href="/signup"
               className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
             >
               Get Started
@@ -45,13 +45,13 @@ const HomePage = () => {
           {/* Mobile - simplified for now */}
           <div className="md:hidden flex items-center gap-3">
             <Link
-              href="/app/login"
+              href="/login"
               className="text-slate-300 hover:text-orange-500 transition-colors text-sm"
             >
               Sign In
             </Link>
             <Link
-              href="/app/signup"
+              href="/signup"
               className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm"
             >
               Get Started
