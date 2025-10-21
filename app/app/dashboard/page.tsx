@@ -5,7 +5,8 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getTodayLocalDate, getLocalDateDaysAgo, formatDateForDisplay, formatTimeForDisplay } from '@/lib/utils/date';
-import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X } from 'lucide-react';
+import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin } from 'lucide-react';
+import { BitcoinService } from '@/lib/services/bitcoin';
 
 interface DailyEntry {
   id: string;
@@ -38,6 +39,10 @@ export default function DashboardPage() {
   const [streak, setStreak] = useState(0);
   const [average7Day, setAverage7Day] = useState(0);
   const [pathDescription, setPathDescription] = useState('');
+
+  // Bitcoin stats
+  const [totalSats, setTotalSats] = useState(0);
+  const [totalBtcInvested, setTotalBtcInvested] = useState(0);
 
   // Calculate streak from entries
   const calculateStreak = (entries: DailyEntry[]): number => {
@@ -163,6 +168,18 @@ export default function DashboardPage() {
         if (pathError) throw pathError;
         setPathDescription(pathData.display_name);
 
+        // Load Bitcoin portfolio data
+        const { data: portfolio } = await supabase
+          .from('bitcoin_portfolio')
+          .select('total_sats, total_btc')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (portfolio) {
+          setTotalSats(portfolio.total_sats || 0);
+          setTotalBtcInvested(portfolio.total_btc || 0);
+        }
+
         setLoading(false);
       } catch (err) {
         console.error('Error loading dashboard:', err);
@@ -230,6 +247,9 @@ export default function DashboardPage() {
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
               </Link>
+              <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Sovereignty
+              </Link>
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
@@ -265,6 +285,9 @@ export default function DashboardPage() {
               </Link>
               <Link href="/app/analytics" className="block text-slate-300">
                 Analytics
+              </Link>
+              <Link href="/app/sovereignty" className="block text-slate-300">
+                Sovereignty
               </Link>
               <Link href="/app/paths" className="block text-slate-300">
                 Paths
@@ -379,22 +402,20 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Path Info Card */}
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          {/* Bitcoin Sats Stacked */}
+          <div className="bg-gradient-to-br from-orange-900/50 to-slate-800 rounded-lg p-6 border border-orange-700">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar size={24} className="text-orange-500" />
-              <h3 className="text-lg font-semibold text-white">Your Path</h3>
+              <Bitcoin size={24} className="text-orange-500" />
+              <h3 className="text-lg font-semibold text-orange-400 uppercase">Sats Stacked</h3>
             </div>
-            <p className="text-2xl font-bold text-orange-500 mb-2">
-              {pathDescription}
+            <p className="text-5xl font-bold text-orange-500">
+              {BitcoinService.formatSats(totalSats)}
             </p>
-            <p className="text-slate-400 text-sm mb-4">
-              {profile?.selected_path === 'default' && 'Balanced approach to sovereignty'}
-              {profile?.selected_path === 'financial_path' && 'Focus on financial independence'}
-              {profile?.selected_path === 'mental_resilience' && 'Strengthen your mind'}
-              {profile?.selected_path === 'physical_optimization' && 'Optimize your body'}
-              {profile?.selected_path === 'spiritual_growth' && 'Deepen your practice'}
-              {profile?.selected_path === 'planetary_stewardship' && 'Care for the planet'}
+            <p className="text-slate-400 text-sm mt-2">
+              {BitcoinService.formatBtc(totalBtcInvested)} BTC
+            </p>
+            <p className="text-slate-500 text-xs mt-2">
+              Your Bitcoin savings
             </p>
           </div>
         </div>

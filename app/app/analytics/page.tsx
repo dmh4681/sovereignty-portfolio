@@ -5,8 +5,9 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getLocalDateDaysAgo } from '@/lib/utils/date';
-import { Loader2, Calendar, BarChart, Flame, Target, Menu, X, LogOut, TrendingUp, AlertCircle } from 'lucide-react';
+import { Loader2, Calendar, BarChart, Flame, Target, Menu, X, LogOut, TrendingUp, AlertCircle, Bitcoin } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BitcoinService } from '@/lib/services/bitcoin';
 
 interface DailyEntry {
   id: string;
@@ -38,6 +39,8 @@ export default function AnalyticsPage() {
   const [totalDays, setTotalDays] = useState(0);
   const [averageScore, setAverageScore] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [totalSats, setTotalSats] = useState(0);
+  const [totalBtcInvested, setTotalBtcInvested] = useState(0);
 
   useEffect(() => {
     async function loadAnalytics() {
@@ -92,6 +95,18 @@ export default function AnalyticsPage() {
 
           const streak = calculateBestStreak(entriesData);
           setBestStreak(streak);
+        }
+
+        // Load Bitcoin portfolio data
+        const { data: portfolio } = await supabase
+          .from('bitcoin_portfolio')
+          .select('total_sats, total_btc')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (portfolio) {
+          setTotalSats(portfolio.total_sats || 0);
+          setTotalBtcInvested(portfolio.total_btc || 0);
         }
 
         setLoading(false);
@@ -277,6 +292,9 @@ export default function AnalyticsPage() {
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
+              <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Sovereignty
+              </Link>
               <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Settings
               </Link>
@@ -312,6 +330,9 @@ export default function AnalyticsPage() {
               </Link>
               <Link href="/app/paths" className="block text-slate-300">
                 Paths
+              </Link>
+              <Link href="/app/sovereignty" className="block text-slate-300">
+                Sovereignty
               </Link>
               <Link href="/app/settings" className="block text-slate-300">
                 Settings
@@ -362,6 +383,16 @@ export default function AnalyticsPage() {
                 <p className="text-slate-400 text-sm mt-1">Days logged</p>
               </div>
 
+              {/* Bitcoin Sats Stacked */}
+              <div className="bg-gradient-to-br from-orange-900/50 to-slate-800 rounded-lg p-6 border border-orange-700">
+                <div className="flex items-center gap-3 mb-3">
+                  <Bitcoin size={24} className="text-orange-500" />
+                  <h3 className="text-sm font-semibold text-orange-400 uppercase">Sats Stacked</h3>
+                </div>
+                <p className="text-4xl font-bold text-orange-500">{BitcoinService.formatSats(totalSats)}</p>
+                <p className="text-slate-400 text-sm mt-1">{BitcoinService.formatBtc(totalBtcInvested)} BTC</p>
+              </div>
+
               {/* Average Score */}
               <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
                 <div className="flex items-center gap-3 mb-3">
@@ -380,16 +411,6 @@ export default function AnalyticsPage() {
                 </div>
                 <p className="text-4xl font-bold text-orange-500">{bestStreak}</p>
                 <p className="text-slate-400 text-sm mt-1">{bestStreak === 1 ? 'day' : 'days'}</p>
-              </div>
-
-              {/* Current Path */}
-              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-                <div className="flex items-center gap-3 mb-3">
-                  <Target size={24} className="text-orange-500" />
-                  <h3 className="text-sm font-semibold text-slate-400 uppercase">Current Path</h3>
-                </div>
-                <p className="text-2xl font-bold text-orange-500">{pathName}</p>
-                <p className="text-slate-400 text-sm mt-1">Sovereignty path</p>
               </div>
             </div>
 
