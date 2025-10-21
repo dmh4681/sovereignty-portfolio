@@ -469,15 +469,15 @@ const SovereigntyPathAssessment = () => {
           {/* CTA to Full App */}
           <div className="mt-8 text-center">
             <a
-              href="https://thesovereigntypath.streamlit.app"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/app/paths"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-xl transition-all"
             >
-              Start Your Sovereignty Journey
+              View Your Path & Start Tracking
               <ArrowRight size={20} />
             </a>
-            <p className="text-slate-400 text-sm mt-3">Track your daily progress and build lasting sovereignty</p>
+            <p className="text-slate-400 text-sm mt-3">
+              Explore your recommended path and create your free account
+            </p>
           </div>
         </div>
       </div>
