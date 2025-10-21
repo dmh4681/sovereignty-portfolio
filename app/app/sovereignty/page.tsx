@@ -17,9 +17,7 @@ import {
   Loader2,
   LogOut,
   Menu,
-  X,
-  Activity,
-  BarChart
+  X
 } from 'lucide-react';
 
 interface InvestmentRecord {
@@ -44,6 +42,7 @@ export default function SovereigntyDashboard() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {

@@ -57,7 +57,7 @@ export class SovereigntyCalculator {
     }
 
     // Get Bitcoin portfolio
-    const { data: portfolio, error: portfolioError } = await supabase
+    const { data: portfolio } = await supabase
       .from('bitcoin_portfolio')
       .select('total_btc, total_sats')
       .eq('user_id', userId)

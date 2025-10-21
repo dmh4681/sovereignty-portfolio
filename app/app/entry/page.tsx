@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateDailyScore, DailyActivities, PathConfig, getActivityPoints } from '@/lib/scoring';
 import { getTodayLocalDate, formatDateForDisplay } from '@/lib/utils/date';
-import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X, Info } from 'lucide-react';
-import { getActivityDescription, ActivityDescription } from '@/lib/activity-descriptions';
+import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X, Info, Bitcoin } from 'lucide-react';
+import { getActivityDescription } from '@/lib/activity-descriptions';
+import { SovereigntyCalculator } from '@/lib/analytics/sovereignty-calculator';
 
 // Activity Tooltip Component
 interface ActivityTooltipProps {
@@ -83,6 +84,7 @@ export default function DailyEntryPage() {
   const [junkFood, setJunkFood] = useState(false);
   const [noSpending, setNoSpending] = useState(false);
   const [investedBitcoin, setInvestedBitcoin] = useState(false);
+  const [bitcoinInvestmentAmount, setBitcoinInvestmentAmount] = useState(0);
   const [meditation, setMeditation] = useState(false);
   const [gratitude, setGratitude] = useState(false);
   const [readOrLearned, setReadOrLearned] = useState(false);
@@ -151,6 +153,7 @@ export default function DailyEntryPage() {
           setJunkFood(existingEntry.junk_food || false);
           setNoSpending(existingEntry.no_spending || false);
           setInvestedBitcoin(existingEntry.invested_bitcoin || false);
+          setBitcoinInvestmentAmount(existingEntry.investment_amount_usd || 0);
           setMeditation(existingEntry.meditation || false);
           setGratitude(existingEntry.gratitude || false);
           setReadOrLearned(existingEntry.read_or_learned || false);
@@ -217,6 +220,7 @@ export default function DailyEntryPage() {
     try {
       const today = getTodayLocalDate();
 
+      // Save daily entry with Bitcoin investment amount
       const { error: upsertError } = await supabase
         .from('daily_entries')
         .upsert({
@@ -230,6 +234,7 @@ export default function DailyEntryPage() {
           junk_food: junkFood,
           no_spending: noSpending,
           invested_bitcoin: investedBitcoin,
+          investment_amount_usd: bitcoinInvestmentAmount,
           meditation: meditation,
           gratitude: gratitude,
           read_or_learned: readOrLearned,
@@ -239,6 +244,19 @@ export default function DailyEntryPage() {
         });
 
       if (upsertError) throw upsertError;
+
+      // If user invested Bitcoin, record it in their portfolio
+      if (investedBitcoin && bitcoinInvestmentAmount > 0) {
+        const investmentSuccess = await SovereigntyCalculator.recordInvestment(
+          userId,
+          bitcoinInvestmentAmount,
+          new Date()
+        );
+
+        if (!investmentSuccess) {
+          console.warn('Bitcoin investment recorded in entry but failed to update portfolio');
+        }
+      }
 
       setSuccess(true);
       setSaving(false);
@@ -513,21 +531,46 @@ export default function DailyEntryPage() {
                   </span>
                 </label>
 
-                <label className="bg-slate-900 rounded-lg p-4 flex items-center cursor-pointer hover:bg-slate-800 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={investedBitcoin}
-                    onChange={(e) => setInvestedBitcoin(e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
-                  />
-                  <span className="text-slate-300 flex-1 inline-flex items-center">
-                    Did you invest in Bitcoin?
-                    <ActivityTooltip activityId="invested_bitcoin" />
-                    {activityPoints.invested_bitcoin && (
-                      <span className="text-orange-400 text-sm ml-2">({activityPoints.invested_bitcoin})</span>
-                    )}
-                  </span>
-                </label>
+                <div className="bg-slate-900 rounded-lg p-4">
+                  <label className="flex items-center cursor-pointer hover:bg-slate-800/50 p-2 rounded transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={investedBitcoin}
+                      onChange={(e) => setInvestedBitcoin(e.target.checked)}
+                      className="w-5 h-5 rounded border-slate-600 text-orange-500 focus:ring-orange-500 focus:ring-offset-slate-900 mr-3"
+                    />
+                    <span className="text-slate-300 flex-1 inline-flex items-center">
+                      Did you invest in Bitcoin?
+                      <ActivityTooltip activityId="invested_bitcoin" />
+                      {activityPoints.invested_bitcoin && (
+                        <span className="text-orange-400 text-sm ml-2">({activityPoints.invested_bitcoin})</span>
+                      )}
+                    </span>
+                  </label>
+
+                  {/* Bitcoin investment amount input - shown when checked */}
+                  {investedBitcoin && (
+                    <div className="mt-4 pl-2">
+                      <label htmlFor="btc-amount" className="block text-slate-400 text-sm mb-2 flex items-center gap-2">
+                        <Bitcoin size={16} className="text-orange-500" />
+                        Investment Amount (USD)
+                      </label>
+                      <input
+                        id="btc-amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={bitcoinInvestmentAmount || ''}
+                        onChange={(e) => setBitcoinInvestmentAmount(parseFloat(e.target.value) || 0)}
+                        placeholder="Enter amount in USD"
+                        className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-orange-500 focus:outline-none"
+                      />
+                      <p className="text-slate-500 text-xs mt-2">
+                        This will be added to your Bitcoin portfolio and sovereignty metrics
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
