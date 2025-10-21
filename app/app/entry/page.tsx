@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { calculateDailyScore, DailyActivities, PathConfig, getActivityPoints } from '@/lib/scoring';
 import { getTodayLocalDate } from '@/lib/utils/date';
-import { Loader2, Save, TrendingUp, Activity } from 'lucide-react';
+import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X } from 'lucide-react';
 
 export default function DailyEntryPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
 
@@ -147,6 +149,11 @@ export default function DailyEntryPage() {
     environmentalAction
   ]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
   const handleSave = async () => {
     if (!userId || !pathConfig) return;
 
@@ -216,17 +223,92 @@ export default function DailyEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent mb-2">
-            Daily Entry
-          </h1>
-          <p className="text-slate-400">
-            Track your sovereignty activities for today
-          </p>
+    <div className="min-h-screen bg-slate-900">
+      {/* Navigation Bar */}
+      <nav className="bg-slate-800 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/app/dashboard" className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
+              Sovereignty Path
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/app/dashboard" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/app/entry" className="text-orange-500 font-semibold">
+                Log Entry
+              </Link>
+              <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Analytics
+              </Link>
+              <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Paths
+              </Link>
+              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-slate-300"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 space-y-3 border-t border-slate-700">
+              <Link href="/app/dashboard" className="block text-slate-300">
+                Dashboard
+              </Link>
+              <Link href="/app/entry" className="block text-orange-500 font-semibold">
+                Log Entry
+              </Link>
+              <Link href="/app/analytics" className="block text-slate-300">
+                Analytics
+              </Link>
+              <Link href="/app/paths" className="block text-slate-300">
+                Paths
+              </Link>
+              <Link href="/app/settings" className="block text-slate-300">
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-slate-300"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent mb-2">
+              Daily Entry
+            </h1>
+            <p className="text-slate-400">
+              Track your sovereignty activities for today
+            </p>
+          </div>
 
         {/* Score Display */}
         <div className="bg-slate-800 rounded-lg p-8 border border-slate-700 mb-8">
@@ -483,6 +565,7 @@ export default function DailyEntryPage() {
             </>
           )}
         </button>
+        </div>
       </div>
     </div>
   );

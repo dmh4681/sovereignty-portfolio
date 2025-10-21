@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Shield, CheckCircle, TrendingUp, ArrowRight } from 'lucide-react';
+import { Loader2, Shield, CheckCircle, TrendingUp, ArrowRight, LogOut, Menu, X } from 'lucide-react';
 
 interface PathData {
   name: string;
@@ -29,6 +29,7 @@ export default function PathsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [switching, setSwitching] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
 
@@ -77,6 +78,11 @@ export default function PathsPage() {
 
     loadPaths();
   }, [router, supabase]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   const handleSwitchPath = async (newPathName: string, displayName: string) => {
     const confirmed = window.confirm(
@@ -243,13 +249,76 @@ export default function PathsPage() {
 
   return (
     <div className="min-h-screen bg-slate-900">
-      {/* Simple Nav */}
-      <nav className="bg-slate-800 border-b border-slate-700 px-4 py-4">
-        <div className="max-w-7xl mx-auto">
-          <Link href="/app/dashboard" className="text-orange-500 hover:text-orange-400 flex items-center gap-2 transition-colors">
-            <ArrowRight size={18} className="rotate-180" />
-            Back to Dashboard
-          </Link>
+      {/* Navigation Bar */}
+      <nav className="bg-slate-800 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/app/dashboard" className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
+              Sovereignty Path
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/app/dashboard" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/app/entry" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Log Entry
+              </Link>
+              <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Analytics
+              </Link>
+              <Link href="/app/paths" className="text-orange-500 font-semibold">
+                Paths
+              </Link>
+              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-slate-300"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 space-y-3 border-t border-slate-700">
+              <Link href="/app/dashboard" className="block text-slate-300">
+                Dashboard
+              </Link>
+              <Link href="/app/entry" className="block text-slate-300">
+                Log Entry
+              </Link>
+              <Link href="/app/analytics" className="block text-slate-300">
+                Analytics
+              </Link>
+              <Link href="/app/paths" className="block text-orange-500 font-semibold">
+                Paths
+              </Link>
+              <Link href="/app/settings" className="block text-slate-300">
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-slate-300"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
