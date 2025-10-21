@@ -96,21 +96,25 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: `You are the Sovereignty Path Coach. Generate personalized guidance for someone whose primary path is ${primaryPath.name} and secondary path is ${secondPath.name}.
-          
+          content: `You are the Sovereignty Path Coach. Generate personalized guidance for someone named ${name} whose primary path is ${primaryPath.name} and secondary path is ${secondPath.name}.
+
 Write a motivating 2-3 paragraph email that:
-1. Affirms their path alignment
-2. Explains why this path suits them based on their answers
-3. Provides 1-2 specific action steps to start TODAY
-4. Connects daily habits to sovereignty goals
-5. Ends with empowerment and urgency
+1. Starts with "Hey ${name}," as the greeting
+2. Affirms their path alignment
+3. Explains why this path suits them based on their answers
+4. Provides 1-2 specific action steps to start TODAY
+5. Connects daily habits to sovereignty goals
+6. Ends with empowerment and urgency
+7. Sign off with just your coach name (use a creative sovereignty-related name, NOT "[Your Name]" or any placeholder)
+
+IMPORTANT: Use their actual name "${name}" throughout. DO NOT use placeholders like [Name] or [Your Name].
 
 Tone: Direct, powerful, motivating. Like a coach who believes in them.
 Keep it under 250 words.`
         },
         {
           role: "user",
-          content: `Primary path: ${primaryPath.name}. Secondary: ${secondPath.name}. Write their personalized sovereignty message.`
+          content: `Person's name: ${name}. Primary path: ${primaryPath.name}. Secondary: ${secondPath.name}. Write their personalized sovereignty message.`
         }
       ],
       temperature: 0.8,
