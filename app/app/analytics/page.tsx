@@ -29,7 +29,9 @@ export default function AnalyticsPage() {
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-  const supabase = createBrowserClient();
+
+  // Memoize supabase client to prevent multiple instances
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [pathName, setPathName] = useState('');

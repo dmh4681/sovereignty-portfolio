@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -15,7 +15,9 @@ export default function DailyEntryPage() {
   const [success, setSuccess] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-  const supabase = createBrowserClient();
+
+  // Memoize supabase client to prevent multiple instances
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   // User and path data
   const [userId, setUserId] = useState<string>('');
