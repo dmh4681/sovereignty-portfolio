@@ -10,8 +10,10 @@ const HomePage = () => {
       {/* Simple Header */}
       <header className="fixed w-full bg-slate-900/95 backdrop-blur-sm z-50 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-orange-500">Sovereignty Tracker</span>
-          <nav className="flex gap-6">
+          <Link href="/" className="text-xl font-bold text-orange-500 hover:text-orange-400 transition-colors">
+            Sovereignty Tracker
+          </Link>
+          <nav className="hidden md:flex items-center gap-6">
             <Link href="/blog" className="text-slate-300 hover:text-orange-500 transition-colors">
               Blog
             </Link>
@@ -21,7 +23,40 @@ const HomePage = () => {
             <Link href="/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
               Sovereignty Path
             </Link>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-slate-700" />
+
+            {/* App Access */}
+            <Link
+              href="/app/login"
+              className="text-slate-300 hover:text-orange-500 transition-colors font-medium"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/app/signup"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              Get Started
+            </Link>
           </nav>
+
+          {/* Mobile - simplified for now */}
+          <div className="md:hidden flex items-center gap-3">
+            <Link
+              href="/app/login"
+              className="text-slate-300 hover:text-orange-500 transition-colors text-sm"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/app/signup"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </header>
 

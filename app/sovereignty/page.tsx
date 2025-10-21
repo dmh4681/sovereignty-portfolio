@@ -440,23 +440,40 @@ const SovereigntyLandingPage = () => {
       {/* Header */}
       <header className="fixed w-full bg-slate-900/95 backdrop-blur-sm z-50 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-amber-500 hover:text-amber-400 transition-colors">
+          <Link href="/" className="text-xl font-bold text-orange-500 hover:text-orange-400 transition-colors">
             Sovereignty Tracker
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-6">
-            <a href="#features" className="text-slate-300 hover:text-amber-500 transition-colors">
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#features" className="text-slate-300 hover:text-orange-500 transition-colors">
               Features
             </a>
-            <a href="#paths" className="text-slate-300 hover:text-amber-500 transition-colors">
+            <a href="#paths" className="text-slate-300 hover:text-orange-500 transition-colors">
               Paths
             </a>
             <Link
               href="/assessment"
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+              className="text-slate-300 hover:text-orange-500 transition-colors"
             >
               Take Assessment
+            </Link>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-slate-700" />
+
+            {/* App Access */}
+            <Link
+              href="/app/login"
+              className="text-slate-300 hover:text-orange-500 transition-colors font-medium"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/app/signup"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              Get Started
             </Link>
           </nav>
 
@@ -464,7 +481,7 @@ const SovereigntyLandingPage = () => {
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-slate-300 hover:text-amber-500"
+              className="text-slate-300 hover:text-orange-500"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -473,28 +490,47 @@ const SovereigntyLandingPage = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden pb-4 px-4">
-            <a
-              href="#features"
-              className="block py-2 text-slate-300 hover:text-amber-500"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Features
-            </a>
-            <a
-              href="#paths"
-              className="block py-2 text-slate-300 hover:text-amber-500"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Paths
-            </a>
-            <Link
-              href="/assessment"
-              className="block mt-2 text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Take Assessment
-            </Link>
+          <div className="md:hidden bg-slate-800 border-t border-slate-700">
+            <div className="px-4 py-4 space-y-3">
+              <a
+                href="#features"
+                className="block text-slate-300 hover:text-orange-500 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a
+                href="#paths"
+                className="block text-slate-300 hover:text-orange-500 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Paths
+              </a>
+              <Link
+                href="/assessment"
+                className="block text-slate-300 hover:text-orange-500 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Take Assessment
+              </Link>
+
+              <div className="border-t border-slate-700 my-3" />
+
+              <Link
+                href="/app/login"
+                className="block text-slate-300 hover:text-orange-500 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/app/signup"
+                className="block bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Get Started
+              </Link>
+            </div>
           </div>
         )}
       </header>
@@ -519,21 +555,33 @@ const SovereigntyLandingPage = () => {
             Choose your personalized path and track your sovereignty journey - one day at a time.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
             <Link
               href="/assessment"
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors inline-flex items-center justify-center gap-2"
             >
               Find Your Path
               <ArrowRight size={20} />
             </Link>
-            <Link
-              href="/signup"
-              className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors border border-slate-700 inline-flex items-center justify-center gap-2"
-            >
-              Try the App
-            </Link>
+            <div className="flex gap-3 justify-center">
+              <Link
+                href="/app/login"
+                className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-4 rounded-lg font-semibold transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/app/signup"
+                className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors border border-slate-600"
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
+
+          <p className="text-slate-400 text-sm text-center">
+            Already tracking? <Link href="/app/login" className="text-orange-500 hover:text-orange-400 underline">Sign in here</Link>
+          </p>
         </div>
       </section>
 
@@ -595,20 +643,25 @@ const SovereigntyLandingPage = () => {
       {/* Social Proof */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-12 text-slate-400">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">6</div>
-              <div className="text-sm uppercase tracking-wide">Sovereignty Paths</div>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-center">
+            <div>
+              <p className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">6</p>
+              <p className="text-slate-400 text-sm md:text-base">Sovereignty Paths</p>
             </div>
             <div className="w-px bg-slate-700" />
-            <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">100+</div>
-              <div className="text-sm uppercase tracking-wide">Active Users</div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">1</p>
+              <p className="text-slate-400 text-sm md:text-base">Sovereign Individual</p>
             </div>
             <div className="w-px bg-slate-700" />
-            <div className="text-center">
-              <div className="text-4xl font-bold text-amber-500 mb-2">10K+</div>
-              <div className="text-sm uppercase tracking-wide">Days Tracked</div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">0</p>
+              <p className="text-slate-400 text-sm md:text-base">VC Funding</p>
+            </div>
+            <div className="w-px bg-slate-700" />
+            <div>
+              <p className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">100%</p>
+              <p className="text-slate-400 text-sm md:text-base">Open & Honest</p>
             </div>
           </div>
         </div>
