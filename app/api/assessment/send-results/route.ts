@@ -155,7 +155,7 @@ ${secondPath.dailyPractices.slice(0, 3).map(p => `• ${p}`).join('\n')}
 🚀 READY TO START?
 
 Create your free account and start tracking your daily sovereignty:
-👉 https://www.sovereigntytracker.com/app/signup
+👉 https://www.sovereigntytracker.com/signup
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
