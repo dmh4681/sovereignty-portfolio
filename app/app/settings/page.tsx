@@ -396,6 +396,12 @@ export default function SettingsPage() {
                   Analytics
                 </Link>
                 <Link
+                  href="/app/sovereignty"
+                  className="text-slate-300 hover:text-orange-500 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Sovereignty
+                </Link>
+                <Link
                   href="/app/paths"
                   className="text-slate-300 hover:text-orange-500 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
@@ -443,6 +449,12 @@ export default function SettingsPage() {
                 className="text-slate-300 hover:text-orange-500 block px-3 py-2 rounded-md text-base font-medium"
               >
                 Analytics
+              </Link>
+              <Link
+                href="/app/sovereignty"
+                className="text-slate-300 hover:text-orange-500 block px-3 py-2 rounded-md text-base font-medium"
+              >
+                Sovereignty
               </Link>
               <Link
                 href="/app/paths"

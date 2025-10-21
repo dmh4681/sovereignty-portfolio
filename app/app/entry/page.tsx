@@ -314,6 +314,9 @@ export default function DailyEntryPage() {
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
               </Link>
+              <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Sovereignty
+              </Link>
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
@@ -349,6 +352,9 @@ export default function DailyEntryPage() {
               </Link>
               <Link href="/app/analytics" className="block text-slate-300">
                 Analytics
+              </Link>
+              <Link href="/app/sovereignty" className="block text-slate-300">
+                Sovereignty
               </Link>
               <Link href="/app/paths" className="block text-slate-300">
                 Paths
