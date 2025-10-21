@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { calculateDailyScore, DailyActivities, PathConfig, getActivityPoints } from '@/lib/scoring';
+import { getTodayLocalDate } from '@/lib/utils/date';
 import { Loader2, Save, TrendingUp, Activity } from 'lucide-react';
 
 export default function DailyEntryPage() {
@@ -75,7 +76,7 @@ export default function DailyEntryPage() {
         setActivityPoints(getActivityPoints(pathData.config as PathConfig));
 
         // Check if entry exists for today
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayLocalDate();
         const { data: existingEntry, error: entryError } = await supabase
           .from('daily_entries')
           .select('*')
@@ -154,7 +155,7 @@ export default function DailyEntryPage() {
     setSuccess(false);
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayLocalDate();
 
       const { error: upsertError } = await supabase
         .from('daily_entries')

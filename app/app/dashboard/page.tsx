@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getTodayLocalDate, getLocalDateDaysAgo, formatDateForDisplay, formatTimeForDisplay } from '@/lib/utils/date';
 import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X } from 'lucide-react';
 
 interface DailyEntry {
@@ -117,8 +118,8 @@ export default function DashboardPage() {
         setProfile(profileData);
 
         // Get today's entry
-        const today = new Date().toISOString().split('T')[0];
-        const { data: todayData, error: todayError } = await supabase
+        const today = getTodayLocalDate();
+        const { data: todayData, error: todayError} = await supabase
           .from('daily_entries')
           .select('*')
           .eq('user_id', session.user.id)
@@ -132,13 +133,12 @@ export default function DashboardPage() {
         setTodayEntry(todayData);
 
         // Get last 30 days of entries (for streak calculation)
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysAgo = getLocalDateDaysAgo(30);
         const { data: entriesData, error: entriesError } = await supabase
           .from('daily_entries')
           .select('*')
           .eq('user_id', session.user.id)
-          .gte('entry_date', thirtyDaysAgo.toISOString().split('T')[0])
+          .gte('entry_date', thirtyDaysAgo)
           .order('entry_date', { ascending: false });
 
         if (entriesError) throw entriesError;
@@ -177,17 +177,6 @@ export default function DashboardPage() {
     router.push('/');
   };
 
-  // Format date nicely
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  };
-
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  };
-
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-400';
     if (score >= 60) return 'text-orange-400';
@@ -215,8 +204,7 @@ export default function DashboardPage() {
     );
   }
 
-  const today = new Date();
-  const todayFormatted = formatDate(today.toISOString());
+  const todayFormatted = formatDateForDisplay(getTodayLocalDate());
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -324,7 +312,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <p className="text-slate-400 text-sm mt-3">
-                    Entry logged at {formatTime(todayEntry.created_at)}
+                    Entry logged at {formatTimeForDisplay(todayEntry.created_at)}
                   </p>
                 </div>
                 <Link
@@ -433,9 +421,9 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-slate-400">
-                      <p className="font-medium text-white">{formatDate(entry.entry_date)}</p>
+                      <p className="font-medium text-white">{formatDateForDisplay(entry.entry_date)}</p>
                       <p className="text-xs text-slate-500">
-                        Logged at {formatTime(entry.created_at)}
+                        Logged at {formatTimeForDisplay(entry.created_at)}
                       </p>
                     </div>
                   </div>

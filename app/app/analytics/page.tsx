@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getLocalDateDaysAgo } from '@/lib/utils/date';
 import { Loader2, Calendar, BarChart, Flame, Target, Menu, X, LogOut, TrendingUp, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -65,14 +66,13 @@ export default function AnalyticsPage() {
         setPathName(pathData?.display_name || 'Default');
 
         // Get last 30 days of entries
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysAgo = getLocalDateDaysAgo(30);
 
         const { data: entriesData, error: entriesError } = await supabase
           .from('daily_entries')
           .select('*')
           .eq('user_id', session.user.id)
-          .gte('entry_date', thirtyDaysAgo.toISOString().split('T')[0])
+          .gte('entry_date', thirtyDaysAgo)
           .order('entry_date', { ascending: true });
 
         if (entriesError) throw entriesError;
@@ -102,6 +102,18 @@ export default function AnalyticsPage() {
 
     loadAnalytics();
   }, [router, supabase]);
+
+  // Memoize chart data to prevent re-rendering glitches
+  const chartData = useMemo(() => {
+    return entries.map((entry, index) => ({
+      id: `${entry.entry_date}-${index}`, // Add unique key
+      date: new Date(entry.entry_date + 'T12:00:00').toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      }),
+      score: entry.score
+    }));
+  }, [entries]);
 
   const calculateBestStreak = (entries: DailyEntry[]): number => {
     if (entries.length === 0) return 0;
@@ -234,14 +246,6 @@ export default function AnalyticsPage() {
       </div>
     );
   }
-
-  const chartData = entries.map(entry => ({
-    date: new Date(entry.entry_date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    }),
-    score: entry.score
-  }));
 
   const activityFrequency = getActivityFrequency();
   const bestDays = getBestDays();
@@ -430,6 +434,7 @@ export default function AnalyticsPage() {
                     strokeWidth={2}
                     dot={{ fill: '#f97316', r: 4 }}
                     activeDot={{ r: 6 }}
+                    isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
