@@ -500,7 +500,7 @@ const SovereigntyLandingPage = () => {
       </header>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="pt-32 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-8">
             <Shield size={16} className="text-amber-500" />
@@ -516,10 +516,10 @@ const SovereigntyLandingPage = () => {
           </p>
 
           <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">
-            The Sovereignty Path is your personalized system for building lasting autonomy - one day at a time.
+            Choose your personalized path and track your sovereignty journey - one day at a time.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/assessment"
               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2"
@@ -534,22 +534,81 @@ const SovereigntyLandingPage = () => {
               Try the App
             </Link>
           </div>
+        </div>
+      </section>
 
-          {/* Social Proof */}
-          <div className="flex flex-wrap justify-center gap-8 text-slate-400">
-            <div>
-              <div className="text-3xl font-bold text-amber-500">6</div>
-              <div className="text-sm">Sovereignty Paths</div>
+      {/* Six Paths - NOW PROMINENT */}
+      <section id="paths" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-900 via-slate-800/50 to-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-4">
+            <div className="inline-block bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-4">
+              <span className="text-amber-500 text-sm font-semibold uppercase tracking-wide">Explore the Paths</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+              Six Paths to Sovereignty
+            </h2>
+            <p className="text-lg text-slate-300 max-w-3xl mx-auto mb-2">
+              Each path offers a unique approach to building freedom. Click any path to explore detailed guidance, expert backing, and scoring details.
+            </p>
+            <p className="text-amber-500 font-semibold mb-10">
+              👇 Click any path to learn more
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {paths.map((path, idx) => {
+              const Icon = path.icon;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => openPathModal(path.pathName)}
+                  className="bg-slate-800/80 backdrop-blur-sm border-2 border-slate-700 hover:border-amber-500 rounded-2xl p-8 transition-all hover:shadow-2xl hover:shadow-amber-500/30 text-left group cursor-pointer hover:scale-105 hover:-translate-y-1 duration-300"
+                >
+                  <div className={`w-16 h-16 bg-gradient-to-r ${path.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                    <Icon size={32} className="text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-amber-500 transition-colors">
+                    {path.name} Path
+                  </h3>
+                  <p className="text-slate-400 mb-6 text-base leading-relaxed">{path.description}</p>
+                  <div className="flex items-center text-amber-500 text-base font-bold group-hover:translate-x-2 transition-transform">
+                    Learn More <ArrowRight size={20} className="ml-2" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="text-center">
+            <p className="text-slate-400 mb-4">Not sure which path is right for you?</p>
+            <Link
+              href="/assessment"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              Take the 3-Minute Assessment
+              <ArrowRight size={20} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-12 text-slate-400">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-amber-500 mb-2">6</div>
+              <div className="text-sm uppercase tracking-wide">Sovereignty Paths</div>
             </div>
             <div className="w-px bg-slate-700" />
-            <div>
-              <div className="text-3xl font-bold text-amber-500">100+</div>
-              <div className="text-sm">Active Users</div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-amber-500 mb-2">100+</div>
+              <div className="text-sm uppercase tracking-wide">Active Users</div>
             </div>
             <div className="w-px bg-slate-700" />
-            <div>
-              <div className="text-3xl font-bold text-amber-500">10K+</div>
-              <div className="text-sm">Days Tracked</div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-amber-500 mb-2">10K+</div>
+              <div className="text-sm uppercase tracking-wide">Days Tracked</div>
             </div>
           </div>
         </div>
@@ -568,50 +627,6 @@ const SovereigntyLandingPage = () => {
                 across the domains that matter: your health, your wealth, and your consciousness.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Six Paths */}
-      <section id="paths" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Six Paths to Sovereignty</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Choose the path that aligns with your current goals, or take our assessment to find your perfect match.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {paths.map((path, idx) => {
-              const Icon = path.icon;
-              return (
-                <button
-                  key={idx}
-                  onClick={() => openPathModal(path.pathName)}
-                  className="bg-slate-800 border border-slate-700 hover:border-amber-500 rounded-xl p-6 transition-all hover:shadow-lg hover:shadow-amber-500/20 text-left group cursor-pointer"
-                >
-                  <div className={`w-12 h-12 bg-gradient-to-r ${path.color} rounded-lg flex items-center justify-center mb-4`}>
-                    <Icon size={24} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-amber-500 transition-colors">{path.name} Path</h3>
-                  <p className="text-slate-400 mb-4">{path.description}</p>
-                  <div className="flex items-center text-amber-500 text-sm font-semibold group-hover:translate-x-1 transition-transform">
-                    Learn More →
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/assessment"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-all"
-            >
-              Take the Assessment
-              <ArrowRight size={20} />
-            </Link>
           </div>
         </div>
       </section>
