@@ -1,8 +1,9 @@
+import 'dotenv/config'; // Add this line FIRST
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Service role key needed to bypass RLS
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 async function generateTestData(userId: string, days: number = 90) {
