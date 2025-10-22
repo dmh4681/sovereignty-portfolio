@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, User, Shield, BarChart, LogOut, Trash2, Menu, X, Calendar, Target, Flame } from 'lucide-react';
+import { Loader2, User, Shield, BarChart, LogOut, Trash2, Menu, X, Calendar, Target, Flame, CreditCard, Zap } from 'lucide-react';
+import { createPortalSession } from '@/lib/stripe/client';
 
 interface DailyEntry {
   id: string;
@@ -17,6 +18,10 @@ interface Profile {
   full_name: string | null;
   selected_path: string;
   created_at: string;
+  subscription_tier?: string;
+  subscription_status?: string;
+  subscription_period_end?: string;
+  subscription_cancel_at_period_end?: boolean;
 }
 
 interface Path {
@@ -262,6 +267,17 @@ export default function SettingsPage() {
       // Reset dropdown on error
       setSelectedPath(currentPath);
       setSwitching(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setActionLoading(true);
+    try {
+      await createPortalSession();
+    } catch (error) {
+      console.error('Portal error:', error);
+      alert('Failed to open subscription management. Please try again.');
+      setActionLoading(false);
     }
   };
 
@@ -661,7 +677,72 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section C: Account Statistics */}
+        {/* Section C: Subscription Management */}
+        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-bold text-slate-100 flex items-center mb-6">
+            <CreditCard className="w-5 h-5 mr-2" />
+            Subscription
+          </h2>
+
+          {profile?.subscription_tier === 'free' || !profile?.subscription_tier ? (
+            <div>
+              <p className="text-slate-400 mb-4">
+                You&apos;re currently on the free tier. Upgrade to unlock AI coaching and Bitcoin analytics.
+              </p>
+              <Link
+                href="/app/pricing"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+              >
+                <Zap size={18} />
+                Upgrade to Premium
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center gap-3 mb-4 p-4 bg-gradient-to-r from-orange-900/20 to-amber-900/20 border border-orange-700/50 rounded-lg">
+                <span className="text-3xl">⭐</span>
+                <div className="flex-1">
+                  <p className="font-semibold text-lg text-orange-400">Premium Subscription</p>
+                  <p className="text-sm text-slate-300">
+                    Status: <span className="capitalize">{profile?.subscription_status || 'Active'}</span>
+                    {profile?.subscription_period_end && (
+                      <span className="text-slate-400">
+                        {' '}- Renews {new Date(profile.subscription_period_end).toLocaleDateString()}
+                      </span>
+                    )}
+                  </p>
+                  {profile?.subscription_cancel_at_period_end && (
+                    <p className="text-sm text-orange-400 mt-1">
+                      Subscription will cancel at the end of the billing period
+                    </p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleManageSubscription}
+                disabled={actionLoading}
+                className="bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+              >
+                {actionLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Opening...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    Manage Subscription
+                  </>
+                )}
+              </button>
+              <p className="text-xs text-slate-500 mt-2">
+                Update payment method, view invoices, or cancel subscription
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Section D: Account Statistics */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold text-slate-100 flex items-center mb-6">
             <BarChart className="w-5 h-5 mr-2" />
@@ -705,7 +786,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section D: Danger Zone */}
+        {/* Section E: Danger Zone */}
         <div className="bg-slate-800 border border-red-500/50 rounded-lg p-6">
           <h2 className="text-xl font-bold text-red-500 flex items-center mb-6">
             ⚠️ Danger Zone

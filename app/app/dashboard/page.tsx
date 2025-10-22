@@ -5,7 +5,7 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getTodayLocalDate, getLocalDateDaysAgo, formatDateForDisplay, formatTimeForDisplay } from '@/lib/utils/date';
-import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin } from 'lucide-react';
+import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin, Zap } from 'lucide-react';
 import { BitcoinService } from '@/lib/services/bitcoin';
 
 interface DailyEntry {
@@ -19,6 +19,8 @@ interface DailyEntry {
 interface Profile {
   full_name: string;
   selected_path: string;
+  subscription_tier?: string;
+  subscription_status?: string;
 }
 
 export default function DashboardPage() {
@@ -117,7 +119,7 @@ export default function DashboardPage() {
         // Load user profile
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('full_name, selected_path')
+          .select('full_name, selected_path, subscription_tier, subscription_status')
           .eq('id', session.user.id)
           .single();
 
@@ -321,6 +323,29 @@ export default function DashboardPage() {
             Today is {todayFormatted}
           </p>
         </div>
+
+        {/* Upgrade CTA for Free Tier */}
+        {(profile?.subscription_tier === 'free' || !profile?.subscription_tier) && (
+          <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/50 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <Zap size={32} className="text-orange-500" />
+                <div>
+                  <h3 className="text-lg font-semibold text-orange-400">Unlock AI Coaching & Advanced Analytics</h3>
+                  <p className="text-slate-300 text-sm">
+                    Get personalized sovereignty coaching and Bitcoin portfolio tracking
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/app/pricing"
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all"
+              >
+                Upgrade to Premium
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Today's Status Card */}
         <div className="mb-8">

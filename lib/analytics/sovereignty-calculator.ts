@@ -204,6 +204,8 @@ export class SovereigntyCalculator {
         total_btc: newTotalBtc,
         total_sats: newTotalSats,
         last_updated: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
       });
 
     if (updateError) {
@@ -211,6 +213,7 @@ export class SovereigntyCalculator {
       return false;
     }
 
+    console.log(`Portfolio updated: ${newTotalSats} sats (${newTotalBtc} BTC)`);
     return true;
   }
 
