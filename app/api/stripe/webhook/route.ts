@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe, STRIPE_CONFIG } from '@/lib/stripe/config';
-import { createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
 export async function POST(request: Request) {
@@ -32,7 +32,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabase = await createServerClient();
+  // Use service role for webhooks since they don't have user sessions
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
 
   try {
     switch (event.type) {

@@ -1,21 +1,50 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/config';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient as createClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
     const { priceId } = await request.json();
+    console.log('Creating checkout session for price:', priceId);
 
-    // Get authenticated user
-    const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
+    // Get access token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Missing authorization header' },
         { status: 401 }
       );
     }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Create Supabase client with the access token
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        }
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    console.log('Auth result:', { user: user?.id, error: authError });
+
+    if (!user) {
+      console.error('No user found. Auth error:', authError);
+      return NextResponse.json(
+        { error: 'Unauthorized - Please log in again' },
+        { status: 401 }
+      );
+    }
+
+    console.log('User authenticated:', user.id);
 
     // Get user profile
     const { data: profile } = await supabase
@@ -24,10 +53,13 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .single();
 
+    console.log('Profile loaded:', profile);
+
     let customerId = profile?.stripe_customer_id;
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
+      console.log('Creating new Stripe customer...');
       const customer = await stripe.customers.create({
         email: profile?.email || user.email,
         metadata: {
@@ -36,6 +68,7 @@ export async function POST(request: Request) {
       });
 
       customerId = customer.id;
+      console.log('Stripe customer created:', customerId);
 
       // Save customer ID to profile
       await supabase
@@ -43,6 +76,10 @@ export async function POST(request: Request) {
         .update({ stripe_customer_id: customerId })
         .eq('id', user.id);
     }
+
+    console.log('Creating Stripe checkout session...');
+    console.log('Success URL:', `${process.env.NEXT_PUBLIC_SITE_URL}/app/dashboard?upgrade=success`);
+    console.log('Cancel URL:', `${process.env.NEXT_PUBLIC_SITE_URL}/app/pricing?upgrade=canceled`);
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -62,11 +99,13 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('Checkout session created:', session.id);
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Checkout error:', error);
+    console.error('Checkout error details:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout session';
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: errorMessage, details: error },
       { status: 500 }
     );
   }

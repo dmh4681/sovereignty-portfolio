@@ -2,20 +2,25 @@ import { createBrowserClient } from '@/lib/supabase/client';
 
 export async function createCheckoutSession(priceId: string) {
   const supabase = createBrowserClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session) {
     throw new Error('Must be logged in to upgrade');
   }
 
   const response = await fetch('/api/stripe/checkout', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`
+    },
     body: JSON.stringify({ priceId }),
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create checkout session');
+    const errorData = await response.json();
+    console.error('Checkout error:', errorData);
+    throw new Error(errorData.error || 'Failed to create checkout session');
   }
 
   const { url } = await response.json();
