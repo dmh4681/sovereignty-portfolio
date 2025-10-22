@@ -32,21 +32,26 @@ export async function createCheckoutSession(priceId: string) {
 
 export async function createPortalSession() {
   const supabase = createBrowserClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     throw new Error('Must be logged in');
   }
 
   const response = await fetch('/api/stripe/portal', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${session.access_token}`
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      userId: user.id,
+    }),
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create portal session');
+    const errorData = await response.json();
+    console.error('Portal error:', errorData);
+    throw new Error(errorData.error || 'Failed to create portal session');
   }
 
   const { url } = await response.json();

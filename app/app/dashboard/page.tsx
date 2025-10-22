@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getTodayLocalDate, getLocalDateDaysAgo, formatDateForDisplay, formatTimeForDisplay } from '@/lib/utils/date';
-import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin, Zap } from 'lucide-react';
+import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin, Zap, Sparkles } from 'lucide-react';
 import { BitcoinService } from '@/lib/services/bitcoin';
 
 interface DailyEntry {
@@ -27,7 +27,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Memoize supabase client to prevent multiple instances
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -103,6 +105,21 @@ export default function DashboardPage() {
     const sum = last7Days.reduce((total, entry) => total + entry.score, 0);
     return Math.round(sum / last7Days.length);
   };
+
+  // Check for upgrade success parameter
+  useEffect(() => {
+    if (searchParams.get('upgrade') === 'success') {
+      setShowUpgradeSuccess(true);
+      // Clear the URL parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      // Auto-hide after 10 seconds
+      const timer = setTimeout(() => {
+        setShowUpgradeSuccess(false);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   // Load dashboard data
   useEffect(() => {
@@ -311,6 +328,30 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Upgrade Success Message */}
+        {showUpgradeSuccess && (
+          <div className="mb-8 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-xl p-6 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Sparkles size={32} className="text-green-400 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-bold text-green-400 mb-1">Welcome to Premium!</h3>
+                  <p className="text-slate-300">
+                    Your subscription is now active. You have full access to AI coaching, Bitcoin analytics, and unlimited tracking history.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUpgradeSuccess(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+                aria-label="Dismiss"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Hero/Welcome Area */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">

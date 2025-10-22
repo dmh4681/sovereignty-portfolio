@@ -37,25 +37,25 @@ async function generateTestData(userId: string, days: number = 90) {
     const envActionProb = 0.3;
     
     const entry = {
-      user_id: userId,
-      entry_date: dateStr,
-      score: score,
-      path: 'financial_sovereignty',
-      
-      // Activities
-      meditation: Math.random() < meditationProb,
-      gratitude: Math.random() < gratitudeProb,
-      read_or_learned: Math.random() < learningProb,
-      strength_training: Math.random() < strengthProb,
-      no_spending: Math.random() < spendingProb,
-      invested_bitcoin: Math.random() < bitcoinProb,
-      environmental_action: Math.random() < envActionProb,
-      no_junk_food: Math.random() < 0.85,
-      
-      // Numeric activities
-      home_cooked_meals: Math.floor(Math.random() * 4),
-      exercise_minutes: Math.floor(Math.random() * 60),
-    };
+        user_id: userId,
+        entry_date: dateStr,
+        score: score,
+        path: 'financial_sovereignty',
+        
+        // Activities
+        meditation: Math.random() < meditationProb,
+        gratitude: Math.random() < gratitudeProb,
+        read_or_learned: Math.random() < learningProb,
+        strength_training: Math.random() < strengthProb,
+        no_spending: Math.random() < spendingProb,
+        invested_bitcoin: Math.random() < bitcoinProb,
+        environmental_action: Math.random() < envActionProb,
+        junk_food: Math.random() < 0.15, // TRUE = ate junk food (15% chance)
+        
+        // Numeric activities
+        home_cooked_meals: Math.floor(Math.random() * 4),
+        exercise_minutes: Math.floor(Math.random() * 60),
+      };
     
     entries.push(entry);
   }
