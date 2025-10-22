@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/config';
-import { createServerClient as createClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {

@@ -28,8 +28,18 @@ export async function createCheckoutSession(priceId: string) {
 }
 
 export async function createPortalSession() {
+  const supabase = createBrowserClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    throw new Error('Must be logged in');
+  }
+
   const response = await fetch('/api/stripe/portal', {
     method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`
+    },
   });
 
   if (!response.ok) {

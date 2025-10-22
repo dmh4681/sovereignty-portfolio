@@ -1,24 +1,33 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/config';
-import { createServerClient as createClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
+    // Get access token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return NextResponse.json(
+        { error: 'Missing authorization header' },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
+        global: {
+          headers: {
+            Authorization: authHeader
+          }
+        }
       }
     );
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser(token);
 
     if (!user) {
       return NextResponse.json(
