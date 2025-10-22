@@ -2,9 +2,9 @@ import { createBrowserClient } from '@/lib/supabase/client';
 
 export async function createCheckoutSession(priceId: string) {
   const supabase = createBrowserClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     throw new Error('Must be logged in to upgrade');
   }
 
@@ -12,9 +12,12 @@ export async function createCheckoutSession(priceId: string) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`
     },
-    body: JSON.stringify({ priceId }),
+    body: JSON.stringify({
+      priceId,
+      userId: user.id,
+      userEmail: user.email
+    }),
   });
 
   if (!response.ok) {
