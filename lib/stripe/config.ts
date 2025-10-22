@@ -1,19 +1,31 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
-}
+// Server-side only - don't import this in client components!
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not set');
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-09-30.clover',
+    typescript: true,
+  });
+};
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-09-30.clover',
-  typescript: true,
-});
+export const stripe = getStripe();
 
+// Server-side config (for API routes)
 export const STRIPE_CONFIG = {
   publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
   priceIdMonthly: process.env.STRIPE_PRICE_ID_MONTHLY!,
   priceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY!,
   webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+};
+
+// Client-safe config (can be imported in browser)
+export const CLIENT_STRIPE_CONFIG = {
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY!,
+  priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY!,
 };
 
 // Subscription tiers

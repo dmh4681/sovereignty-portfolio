@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Check, Zap } from 'lucide-react';
 import { createCheckoutSession } from '@/lib/stripe/client';
-import { TIER_FEATURES, STRIPE_CONFIG } from '@/lib/stripe/config';
+import { TIER_FEATURES, CLIENT_STRIPE_CONFIG } from '@/lib/stripe/config';
 import Link from 'next/link';
 
 export default function PricingPage() {
@@ -22,8 +22,8 @@ export default function PricingPage() {
   };
 
   const priceId = billingPeriod === 'monthly'
-    ? STRIPE_CONFIG.priceIdMonthly
-    : STRIPE_CONFIG.priceIdYearly;
+    ? CLIENT_STRIPE_CONFIG.priceIdMonthly
+    : CLIENT_STRIPE_CONFIG.priceIdYearly;
 
   const price = billingPeriod === 'monthly'
     ? TIER_FEATURES.premium.priceMonthly
