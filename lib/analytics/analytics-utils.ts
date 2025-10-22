@@ -48,6 +48,11 @@ export interface WeekdayAnalysis {
   weekendEffect: 'positive' | 'negative';
 }
 
+export interface BestWorstDays {
+  bestDays: DailyEntry[];
+  worstDays: DailyEntry[];
+}
+
 export class AnalyticsEngine {
 
   static async getEntries(
@@ -85,7 +90,7 @@ export class AnalyticsEngine {
     ];
 
     return activities.map(({ key, label }) => {
-      const totalDays = entries.filter(e => (e as any)[key] === true).length;
+      const totalDays = entries.filter(e => e[key as keyof DailyEntry] === true).length;
       const completionRate = entries.length > 0 ? (totalDays / entries.length) * 100 : 0;
 
       // Calculate current streak (from most recent backwards)
@@ -95,7 +100,7 @@ export class AnalyticsEngine {
       );
 
       for (const entry of sortedDesc) {
-        if ((entry as any)[key] === true) {
+        if (entry[key as keyof DailyEntry] === true) {
           currentStreak++;
         } else {
           break;
@@ -107,7 +112,7 @@ export class AnalyticsEngine {
       let tempStreak = 0;
 
       for (const entry of entries) {
-        if ((entry as any)[key] === true) {
+        if (entry[key as keyof DailyEntry] === true) {
           tempStreak++;
           longestStreak = Math.max(longestStreak, tempStreak);
         } else {
@@ -164,8 +169,8 @@ export class AnalyticsEngine {
         let act2True = 0;
 
         entries.forEach(entry => {
-          const val1 = (entry as any)[act1];
-          const val2 = (entry as any)[act2];
+          const val1 = entry[act1 as keyof DailyEntry];
+          const val2 = entry[act2 as keyof DailyEntry];
 
           if (val1) act1True++;
           if (val2) act2True++;
@@ -194,7 +199,7 @@ export class AnalyticsEngine {
       .slice(0, 5);
   }
 
-  static getBestWorstDays(entries: DailyEntry[]) {
+  static getBestWorstDays(entries: DailyEntry[]): BestWorstDays {
     const sorted = [...entries].sort((a, b) => b.score - a.score);
 
     return {

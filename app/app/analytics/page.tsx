@@ -10,7 +10,8 @@ import {
   ActivityStats,
   TrendData,
   CorrelationData,
-  WeekdayAnalysis
+  WeekdayAnalysis,
+  BestWorstDays
 } from '@/lib/analytics/analytics-utils';
 import {
   LineChart,
@@ -46,7 +47,7 @@ export default function AdvancedAnalytics() {
   const [activityStats, setActivityStats] = useState<ActivityStats[]>([]);
   const [trendData, setTrendData] = useState<TrendData[]>([]);
   const [correlations, setCorrelations] = useState<CorrelationData[]>([]);
-  const [bestWorstDays, setBestWorstDays] = useState<any>(null);
+  const [bestWorstDays, setBestWorstDays] = useState<BestWorstDays | null>(null);
   const [weekdayAnalysis, setWeekdayAnalysis] = useState<WeekdayAnalysis | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
