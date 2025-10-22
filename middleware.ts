@@ -106,5 +106,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*'],
+  // Disable middleware for now - premium checks are done at page level
+  matcher: [],
 };

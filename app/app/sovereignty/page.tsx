@@ -47,18 +47,43 @@ export default function SovereigntyDashboard() {
 
   const loadData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Check authentication - use getSession() like dashboard does
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        console.log('No session found, redirecting to login');
         router.push('/login');
         return;
       }
 
+      console.log('Session found, user ID:', session.user.id);
+
+      // Check if user has premium access
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('subscription_tier, subscription_status')
+        .eq('id', session.user.id)
+        .single();
+
+      console.log('Sovereignty page - checking access:', profile);
+
+      const hasPremium = profile?.subscription_tier === 'premium' &&
+                        profile?.subscription_status === 'active';
+
+      if (!hasPremium) {
+        console.log('User does not have premium, redirecting to pricing');
+        router.push('/app/pricing');
+        return;
+      }
+
+      console.log('User has premium access, loading sovereignty data');
+
       // Load sovereignty metrics
-      const calculatedMetrics = await SovereigntyCalculator.calculateMetrics(user.id);
+      const calculatedMetrics = await SovereigntyCalculator.calculateMetrics(session.user.id);
       setMetrics(calculatedMetrics);
 
       // Load investment history
-      const history = await SovereigntyCalculator.getInvestmentHistory(user.id, 10);
+      const history = await SovereigntyCalculator.getInvestmentHistory(session.user.id, 10);
       setInvestmentHistory(history);
 
       setLoading(false);
