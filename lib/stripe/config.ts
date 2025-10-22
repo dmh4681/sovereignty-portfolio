@@ -1,31 +1,43 @@
 import Stripe from 'stripe';
 
-// Server-side only - don't import this in client components!
-const getStripe = () => {
+// Server-side only - lazy initialization to avoid client-side errors
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripeInstance) return stripeInstance;
+
   if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('STRIPE_SECRET_KEY is not set');
+    throw new Error('STRIPE_SECRET_KEY is not set in server environment');
   }
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+
+  stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-09-30.clover',
     typescript: true,
   });
-};
 
-export const stripe = getStripe();
+  return stripeInstance;
+}
+
+export const stripe = new Proxy({} as Stripe, {
+  get: (_, prop) => {
+    const instance = getStripe();
+    return instance[prop as keyof Stripe];
+  }
+});
 
 // Server-side config (for API routes)
 export const STRIPE_CONFIG = {
-  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-  priceIdMonthly: process.env.STRIPE_PRICE_ID_MONTHLY!,
-  priceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY!,
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+  priceIdMonthly: process.env.STRIPE_PRICE_ID_MONTHLY || '',
+  priceIdYearly: process.env.STRIPE_PRICE_ID_YEARLY || '',
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
 };
 
 // Client-safe config (can be imported in browser)
 export const CLIENT_STRIPE_CONFIG = {
-  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-  priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY!,
-  priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY!,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
+  priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY || '',
+  priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY || '',
 };
 
 // Subscription tiers
