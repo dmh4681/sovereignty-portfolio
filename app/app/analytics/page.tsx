@@ -179,7 +179,7 @@ export default function AdvancedAnalytics() {
         {/* Upgrade Prompt */}
         <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-6">
           <div className="max-w-md text-center">
-            <div className="text-6xl mb-4">=Ê</div>
+            <BarChart3 size={80} className="text-orange-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-white mb-3">Advanced Analytics</h2>
             <p className="text-slate-400 text-lg mb-8">
               Unlock deep insights into your patterns, correlations, and trends with Premium.
@@ -554,7 +554,7 @@ export default function AdvancedAnalytics() {
                   <div>
                     <p className="text-white">
                       <span className="capitalize">{corr.activity1.replace(/_/g, ' ')}</span>
-                      {' ’ '}
+                      {' + '}
                       <span className="capitalize">{corr.activity2.replace(/_/g, ' ')}</span>
                     </p>
                     <p className={`text-sm ${
