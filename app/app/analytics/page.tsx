@@ -158,6 +158,9 @@ export default function AdvancedAnalytics() {
                   <Link href="/app/analytics" className="text-orange-500 font-semibold">
                     Analytics
                   </Link>
+                  <Link href="/app/sovereignty" className="text-slate-300 hover:text-white transition-colors">
+                    Sovereignty
+                  </Link>
                   <Link href="/app/paths" className="text-slate-300 hover:text-white transition-colors">
                     Paths
                   </Link>
@@ -301,6 +304,9 @@ export default function AdvancedAnalytics() {
                 </Link>
                 <Link href="/app/analytics" className="text-orange-500 font-semibold">
                   Analytics
+                </Link>
+                <Link href="/app/sovereignty" className="text-slate-300 hover:text-white transition-colors">
+                  Sovereignty
                 </Link>
                 <Link href="/app/paths" className="text-slate-300 hover:text-white transition-colors">
                   Paths
