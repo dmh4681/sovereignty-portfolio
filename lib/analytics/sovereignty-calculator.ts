@@ -32,6 +32,21 @@ export interface SovereigntyMetrics {
 
 export class SovereigntyCalculator {
   /**
+   * Get current Bitcoin price
+   */
+  static async getBitcoinPrice(): Promise<number | null> {
+    try {
+      const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
+      const data = await response.json();
+      const usdRate = parseFloat(data.data.rates.USD);
+      return usdRate;
+    } catch (error) {
+      console.error('Error fetching Bitcoin price:', error);
+      return null;
+    }
+  }
+
+  /**
    * Calculate comprehensive sovereignty metrics for a user
    */
   static async calculateMetrics(userId: string): Promise<SovereigntyMetrics | null> {
@@ -56,15 +71,14 @@ export class SovereigntyCalculator {
       return null;
     }
 
-    // Get Bitcoin portfolio
-    const { data: portfolio } = await supabase
-      .from('bitcoin_portfolio')
-      .select('total_btc, total_sats')
-      .eq('user_id', userId)
-      .single();
+    // Get Bitcoin portfolio - sum all investments from daily_entries
+    const { data: allEntries } = await supabase
+      .from('daily_entries')
+      .select('sats_purchased, btc_purchased')
+      .eq('user_id', userId);
 
-    const totalBtc = portfolio?.total_btc || 0;
-    const totalSats = portfolio?.total_sats || 0;
+    const totalSats = allEntries?.reduce((sum, entry) => sum + (entry.sats_purchased || 0), 0) || 0;
+    const totalBtc = allEntries?.reduce((sum, entry) => sum + (entry.btc_purchased || 0), 0) || 0;
     const btcValueUsd = BitcoinService.btcToUsd(totalBtc, btcPrice);
     const otherAssetsUsd = profile.other_assets_usd || 0;
     const totalNetWorth = btcValueUsd + otherAssetsUsd;
@@ -218,16 +232,17 @@ export class SovereigntyCalculator {
   }
 
   /**
-   * Get investment history
+   * Get investment history from daily_entries
    */
   static async getInvestmentHistory(userId: string, limit: number = 30) {
     const supabase = createBrowserClient();
 
     const { data, error } = await supabase
-      .from('bitcoin_investments')
-      .select('*')
+      .from('daily_entries')
+      .select('id, entry_date, investment_amount_usd, btc_purchased, sats_purchased')
       .eq('user_id', userId)
-      .order('investment_date', { ascending: false })
+      .eq('invested_bitcoin', true)
+      .order('entry_date', { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -235,6 +250,16 @@ export class SovereigntyCalculator {
       return [];
     }
 
-    return data || [];
+    // Transform to match expected format
+    return (data || []).map(entry => ({
+      id: entry.id,
+      investment_date: entry.entry_date,
+      amount_usd: entry.investment_amount_usd || 0,
+      btc_price_at_purchase: entry.investment_amount_usd && entry.btc_purchased
+        ? entry.investment_amount_usd / entry.btc_purchased
+        : 0,
+      btc_purchased: entry.btc_purchased || 0,
+      sats_purchased: entry.sats_purchased || 0
+    }));
   }
 }

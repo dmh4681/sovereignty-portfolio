@@ -11,7 +11,11 @@ import {
   TrendData,
   CorrelationData,
   WeekdayAnalysis,
-  BestWorstDays
+  BestWorstDays,
+  BitcoinMetrics,
+  BitcoinAccumulation,
+  BitcoinMilestone,
+  DCASimulation,
 } from '@/lib/analytics/analytics-utils';
 import {
   LineChart,
@@ -37,7 +41,9 @@ import {
   LogOut,
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Bitcoin,
+  Zap,
 } from 'lucide-react';
 
 export default function AdvancedAnalytics() {
@@ -51,6 +57,10 @@ export default function AdvancedAnalytics() {
   const [weekdayAnalysis, setWeekdayAnalysis] = useState<WeekdayAnalysis | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [bitcoinMetrics, setBitcoinMetrics] = useState<BitcoinMetrics | null>(null);
+  const [bitcoinAccumulation, setBitcoinAccumulation] = useState<BitcoinAccumulation[]>([]);
+  const [bitcoinMilestones, setBitcoinMilestones] = useState<BitcoinMilestone[]>([]);
+  const [dcaSimulations, setDcaSimulations] = useState<DCASimulation[]>([]);
 
   const supabase = useMemo(() => createBrowserClient(), []);
   const router = useRouter();
@@ -110,6 +120,13 @@ export default function AdvancedAnalytics() {
         setCorrelations(AnalyticsEngine.findCorrelations(fetchedEntries));
         setBestWorstDays(AnalyticsEngine.getBestWorstDays(fetchedEntries));
         setWeekdayAnalysis(AnalyticsEngine.analyzeWeekdayWeekend(fetchedEntries));
+
+        // Calculate Bitcoin analytics
+        const btcMetrics = await AnalyticsEngine.calculateBitcoinMetrics(fetchedEntries);
+        setBitcoinMetrics(btcMetrics);
+        setBitcoinAccumulation(AnalyticsEngine.calculateBitcoinAccumulation(fetchedEntries));
+        setBitcoinMilestones(AnalyticsEngine.calculateBitcoinMilestones(fetchedEntries));
+        setDcaSimulations(AnalyticsEngine.simulateDCA(fetchedEntries, btcMetrics.currentPrice));
       }
 
       setLoading(false);
@@ -215,6 +232,18 @@ export default function AdvancedAnalytics() {
                   <Calendar size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
                   <span>Weekday vs weekend performance</span>
                 </li>
+                <li className="flex items-start gap-3">
+                  <Bitcoin size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+                  <span>Bitcoin accumulation tracking and milestones</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <TrendingUp size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+                  <span>DCA strategy simulations and comparisons</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Zap size={20} className="text-orange-500 flex-shrink-0 mt-0.5" />
+                  <span>Investment discipline analysis</span>
+                </li>
               </ul>
             </div>
             <Link
@@ -241,6 +270,19 @@ export default function AdvancedAnalytics() {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  // Bitcoin formatting helpers
+  const formatBtc = (btc: number) => {
+    return btc.toFixed(8) + ' BTC';
+  };
+
+  const formatSats = (sats: number) => {
+    return sats.toLocaleString() + ' sats';
+  };
+
+  const formatUsd = (usd: number) => {
+    return '$' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   // Get activity streaks
@@ -577,6 +619,307 @@ export default function AdvancedAnalytics() {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Bitcoin Overview Stats - 4 Cards */}
+        {bitcoinMetrics && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <Bitcoin size={28} className="text-orange-500" />
+              Bitcoin Accumulation Analytics
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {/* Total Sats Stacked */}
+              <div className="bg-gradient-to-br from-orange-900/50 to-slate-800 border border-orange-700 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-orange-400 text-sm font-semibold uppercase">Total Sats</h3>
+                  <Bitcoin size={20} className="text-orange-500" />
+                </div>
+                <p className="text-3xl font-bold text-orange-500">
+                  {formatSats(bitcoinMetrics.totalSats)}
+                </p>
+                <p className="text-slate-400 text-sm mt-1">
+                  {formatBtc(bitcoinMetrics.totalBtc)}
+                </p>
+              </div>
+
+              {/* Total Invested */}
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-slate-400 text-sm font-semibold">Total Invested</h3>
+                  <Zap size={20} className="text-orange-500" />
+                </div>
+                <p className="text-3xl font-bold text-white">
+                  {formatUsd(bitcoinMetrics.totalInvested)}
+                </p>
+                <p className="text-slate-400 text-sm mt-1">
+                  Avg: {formatUsd(bitcoinMetrics.averageInvestment)}/investment
+                </p>
+              </div>
+
+              {/* Investment Consistency */}
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-slate-400 text-sm font-semibold">Consistency</h3>
+                  <Flame size={20} className="text-orange-500" />
+                </div>
+                <p className="text-3xl font-bold text-white">
+                  {bitcoinMetrics.consistencyRate.toFixed(1)}%
+                </p>
+                <p className="text-slate-400 text-sm mt-1">
+                  {bitcoinMetrics.investmentDays} of {bitcoinMetrics.totalDays} days
+                </p>
+              </div>
+
+              {/* Portfolio Value / Gain-Loss */}
+              <div className={`border rounded-xl p-6 ${
+                bitcoinMetrics.unrealizedGainLoss >= 0
+                  ? 'bg-green-900/20 border-green-700'
+                  : 'bg-red-900/20 border-red-700'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-slate-400 text-sm font-semibold">Portfolio Value</h3>
+                  {bitcoinMetrics.unrealizedGainLoss >= 0 ? (
+                    <TrendingUp size={20} className="text-green-500" />
+                  ) : (
+                    <TrendingDown size={20} className="text-red-500" />
+                  )}
+                </div>
+                <p className="text-3xl font-bold text-white">
+                  {formatUsd(bitcoinMetrics.portfolioValue)}
+                </p>
+                <p className={`text-sm mt-1 font-semibold ${
+                  bitcoinMetrics.unrealizedGainLoss >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}>
+                  {bitcoinMetrics.unrealizedGainLoss >= 0 ? '+' : ''}
+                  {formatUsd(bitcoinMetrics.unrealizedGainLoss)}
+                  ({bitcoinMetrics.unrealizedGainLossPercent.toFixed(1)}%)
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bitcoin Accumulation Chart */}
+        {bitcoinAccumulation.length > 0 && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-6">Sats Accumulation Over Time</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={bitcoinAccumulation}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#94a3b8"
+                  tickFormatter={formatDate}
+                />
+                <YAxis
+                  stroke="#94a3b8"
+                  tickFormatter={(value) => (value / 1000).toFixed(0) + 'K'}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #475569',
+                    borderRadius: '8px'
+                  }}
+                  labelStyle={{ color: '#cbd5e1' }}
+                  formatter={(value: number) => [formatSats(value), 'Cumulative Sats']}
+                  labelFormatter={formatDate}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="cumulativeSats"
+                  stroke="#f97316"
+                  strokeWidth={3}
+                  name="Total Sats"
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <p className="text-slate-400 text-sm mt-4 text-center">
+              📈 Your Bitcoin stack has grown to {bitcoinMetrics && formatSats(bitcoinMetrics.totalSats)} over {entries.length} days
+            </p>
+          </div>
+        )}
+
+        {/* Bitcoin Milestones */}
+        {bitcoinMilestones.length > 0 && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-6">🎯 Bitcoin Milestones</h2>
+            <div className="space-y-4">
+              {bitcoinMilestones.map((milestone, index) => (
+                <div key={index} className="relative">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{milestone.name.split(' ')[0]}</span>
+                      <div>
+                        <p className={`font-semibold ${milestone.achieved ? 'text-green-400' : 'text-slate-300'}`}>
+                          {milestone.name.substring(2)}
+                        </p>
+                        {milestone.achieved && milestone.achievedDate && (
+                          <p className="text-xs text-slate-500">
+                            Achieved: {formatDate(milestone.achievedDate)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {milestone.achieved ? (
+                        <span className="text-green-500 font-bold">✓ Complete</span>
+                      ) : (
+                        <span className="text-slate-400 text-sm">
+                          {milestone.progress.toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-full bg-slate-700 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        milestone.achieved ? 'bg-green-500' : 'bg-orange-500'
+                      }`}
+                      style={{ width: `${Math.min(100, milestone.progress)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* DCA What-If Scenarios */}
+        {dcaSimulations.length > 0 && bitcoinMetrics && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-4">💡 DCA Strategy Comparison</h2>
+            <p className="text-slate-400 text-sm mb-6">
+              What if you had invested a fixed amount every day during your {entries.length}-day journey?
+              (Based on current BTC price: {formatUsd(bitcoinMetrics.currentPrice)})
+            </p>
+
+            <div className="space-y-4">
+              {dcaSimulations.map((scenario, index) => {
+                const isYourStrategy = Math.abs(scenario.dailyAmount - (bitcoinMetrics.totalInvested / bitcoinMetrics.totalDays)) < 5;
+
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg ${
+                      isYourStrategy
+                        ? 'bg-orange-900/30 border-2 border-orange-500'
+                        : 'bg-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-semibold flex items-center gap-2">
+                          {scenario.scenarioName}
+                          {isYourStrategy && (
+                            <span className="text-xs bg-orange-500 text-white px-2 py-1 rounded">
+                              ← Your Avg
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-slate-400 text-sm">
+                          Total invested: {formatUsd(scenario.projectedUsd)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-orange-500 font-bold text-lg">
+                          {formatSats(scenario.projectedSats)}
+                        </p>
+                        <p className="text-slate-400 text-xs">
+                          {formatBtc(scenario.projectedBtc)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
+              <p className="text-blue-300 text-sm">
+                💡 <strong>Insight:</strong> Consistent daily investments (DCA) help you accumulate Bitcoin regardless of price volatility.
+                Even small amounts compound significantly over time.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Investment Discipline Analysis */}
+        {bitcoinMetrics && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-6">📊 Investment Discipline</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Consistency Score */}
+              <div className="text-center p-4 bg-slate-900 rounded-lg">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-orange-500/20 mb-3">
+                  <span className="text-3xl font-bold text-orange-500">
+                    {bitcoinMetrics.consistencyRate.toFixed(0)}
+                  </span>
+                </div>
+                <p className="text-white font-semibold">Consistency Score</p>
+                <p className="text-slate-400 text-sm mt-1">
+                  {bitcoinMetrics.consistencyRate >= 75 ? 'Excellent!' :
+                   bitcoinMetrics.consistencyRate >= 50 ? 'Good progress' :
+                   bitcoinMetrics.consistencyRate >= 25 ? 'Building habits' :
+                   'Keep stacking!'}
+                </p>
+              </div>
+
+              {/* Average Purchase */}
+              <div className="text-center p-4 bg-slate-900 rounded-lg">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-blue-500/20 mb-3">
+                  <span className="text-2xl font-bold text-blue-500">
+                    ${bitcoinMetrics.averageInvestment.toFixed(0)}
+                  </span>
+                </div>
+                <p className="text-white font-semibold">Avg Investment</p>
+                <p className="text-slate-400 text-sm mt-1">
+                  Per investment day
+                </p>
+              </div>
+
+              {/* Total Investment Days */}
+              <div className="text-center p-4 bg-slate-900 rounded-lg">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-500/20 mb-3">
+                  <span className="text-3xl font-bold text-green-500">
+                    {bitcoinMetrics.investmentDays}
+                  </span>
+                </div>
+                <p className="text-white font-semibold">Investment Days</p>
+                <p className="text-slate-400 text-sm mt-1">
+                  Out of {bitcoinMetrics.totalDays} tracked
+                </p>
+              </div>
+            </div>
+
+            {/* Motivational Messages */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-orange-900/30 to-amber-900/30 border border-orange-700 rounded-lg">
+              {bitcoinMetrics.consistencyRate >= 80 && (
+                <p className="text-orange-300">
+                  🔥 <strong>Incredible discipline!</strong> You&apos;re investing on {bitcoinMetrics.consistencyRate.toFixed(0)}% of days.
+                  This level of consistency is what builds true wealth over time.
+                </p>
+              )}
+              {bitcoinMetrics.consistencyRate >= 50 && bitcoinMetrics.consistencyRate < 80 && (
+                <p className="text-orange-300">
+                  💪 <strong>Solid commitment!</strong> You&apos;re investing on over half your tracked days.
+                  Can you push toward 80% consistency? Every percentage point matters.
+                </p>
+              )}
+              {bitcoinMetrics.consistencyRate < 50 && (
+                <p className="text-orange-300">
+                  🎯 <strong>Opportunity ahead!</strong> You&apos;re building the habit - every investment counts.
+                  Try to invest on at least half your days for maximum impact.
+                </p>
+              )}
             </div>
           </div>
         )}

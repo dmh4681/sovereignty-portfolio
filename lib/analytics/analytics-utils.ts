@@ -16,6 +16,9 @@ export interface DailyEntry {
   junk_food: boolean;
   home_cooked_meals: number;
   exercise_minutes: number;
+  investment_amount_usd?: number;
+  btc_purchased?: number;
+  sats_purchased?: number;
   created_at: string;
 }
 
@@ -51,6 +54,44 @@ export interface WeekdayAnalysis {
 export interface BestWorstDays {
   bestDays: DailyEntry[];
   worstDays: DailyEntry[];
+}
+
+export interface BitcoinMetrics {
+  totalInvested: number;          // Total USD invested
+  totalBtc: number;               // Total BTC accumulated
+  totalSats: number;              // Total sats accumulated
+  investmentDays: number;         // Days where invested_bitcoin = true
+  totalDays: number;              // Total days tracked
+  consistencyRate: number;        // % of days with investment
+  averageInvestment: number;      // Avg USD per investment day
+  currentPrice: number;           // Current BTC price
+  portfolioValue: number;         // Current value in USD
+  unrealizedGainLoss: number;     // Profit/loss
+  unrealizedGainLossPercent: number; // % gain/loss
+}
+
+export interface BitcoinAccumulation {
+  date: string;
+  cumulativeSats: number;
+  cumulativeBtc: number;
+  cumulativeUsd: number;
+  dailyInvestment: number;
+}
+
+export interface BitcoinMilestone {
+  name: string;
+  target: number;              // Target sats
+  achieved: boolean;
+  achievedDate?: string;
+  progress: number;            // % toward milestone
+}
+
+export interface DCASimulation {
+  scenarioName: string;
+  dailyAmount: number;
+  projectedSats: number;
+  projectedBtc: number;
+  projectedUsd: number;
 }
 
 export class AnalyticsEngine {
@@ -236,5 +277,146 @@ export class AnalyticsEngine {
       difference: Math.round((weekdayAvg - weekendAvg) * 10) / 10,
       weekendEffect: weekdayAvg > weekendAvg ? 'negative' : 'positive',
     };
+  }
+
+  /**
+   * Calculate comprehensive Bitcoin metrics
+   */
+  static async calculateBitcoinMetrics(entries: DailyEntry[]): Promise<BitcoinMetrics> {
+    const investmentEntries = entries.filter(e => e.invested_bitcoin);
+
+    const totalInvested = entries.reduce((sum, e) => sum + (e.investment_amount_usd || 0), 0);
+    const totalBtc = entries.reduce((sum, e) => sum + (e.btc_purchased || 0), 0);
+    const totalSats = entries.reduce((sum, e) => sum + (e.sats_purchased || 0), 0);
+
+    const investmentDays = investmentEntries.length;
+    const totalDays = entries.length;
+    const consistencyRate = totalDays > 0 ? (investmentDays / totalDays) * 100 : 0;
+    const averageInvestment = investmentDays > 0 ? totalInvested / investmentDays : 0;
+
+    // Fetch current Bitcoin price
+    let currentPrice = 65000; // Fallback
+    try {
+      const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
+      const data = await response.json();
+      currentPrice = parseFloat(data.data.rates.USD);
+    } catch (error) {
+      console.error('Error fetching BTC price:', error);
+    }
+
+    const portfolioValue = totalBtc * currentPrice;
+    const unrealizedGainLoss = portfolioValue - totalInvested;
+    const unrealizedGainLossPercent = totalInvested > 0
+      ? (unrealizedGainLoss / totalInvested) * 100
+      : 0;
+
+    return {
+      totalInvested,
+      totalBtc,
+      totalSats,
+      investmentDays,
+      totalDays,
+      consistencyRate,
+      averageInvestment,
+      currentPrice,
+      portfolioValue,
+      unrealizedGainLoss,
+      unrealizedGainLossPercent,
+    };
+  }
+
+  /**
+   * Calculate cumulative Bitcoin accumulation over time
+   */
+  static calculateBitcoinAccumulation(entries: DailyEntry[]): BitcoinAccumulation[] {
+    const sorted = [...entries].sort((a, b) =>
+      new Date(a.entry_date).getTime() - new Date(b.entry_date).getTime()
+    );
+
+    let cumulativeSats = 0;
+    let cumulativeBtc = 0;
+    let cumulativeUsd = 0;
+
+    return sorted.map(entry => {
+      cumulativeSats += entry.sats_purchased || 0;
+      cumulativeBtc += entry.btc_purchased || 0;
+      cumulativeUsd += entry.investment_amount_usd || 0;
+
+      return {
+        date: entry.entry_date,
+        cumulativeSats,
+        cumulativeBtc,
+        cumulativeUsd,
+        dailyInvestment: entry.investment_amount_usd || 0,
+      };
+    });
+  }
+
+  /**
+   * Check Bitcoin milestones
+   */
+  static calculateBitcoinMilestones(entries: DailyEntry[]): BitcoinMilestone[] {
+    const milestones = [
+      { name: 'First Sats', target: 1, emoji: '🎯' },
+      { name: '10K Sats', target: 10_000, emoji: '🔸' },
+      { name: '50K Sats', target: 50_000, emoji: '🔶' },
+      { name: '100K Sats', target: 100_000, emoji: '💎' },
+      { name: '500K Sats', target: 500_000, emoji: '🏆' },
+      { name: '1M Sats', target: 1_000_000, emoji: '🚀' },
+      { name: '5M Sats', target: 5_000_000, emoji: '👑' },
+      { name: '10M Sats (0.1 BTC)', target: 10_000_000, emoji: '🦁' },
+      { name: '21M Sats (0.21 BTC)', target: 21_000_000, emoji: '⚡' },
+      { name: '100M Sats (1 BTC)', target: 100_000_000, emoji: '🌟' },
+    ];
+
+    const accumulation = this.calculateBitcoinAccumulation(entries);
+    const currentSats = accumulation[accumulation.length - 1]?.cumulativeSats || 0;
+
+    return milestones.map(milestone => {
+      const achieved = currentSats >= milestone.target;
+      let achievedDate: string | undefined;
+
+      if (achieved) {
+        // Find the date when this milestone was first achieved
+        const achievedEntry = accumulation.find(a => a.cumulativeSats >= milestone.target);
+        achievedDate = achievedEntry?.date;
+      }
+
+      return {
+        name: `${milestone.emoji} ${milestone.name}`,
+        target: milestone.target,
+        achieved,
+        achievedDate,
+        progress: Math.min(100, (currentSats / milestone.target) * 100),
+      };
+    });
+  }
+
+  /**
+   * Simulate different DCA strategies
+   */
+  static simulateDCA(entries: DailyEntry[], currentPrice: number): DCASimulation[] {
+    const totalDays = entries.length;
+    const scenarios = [
+      { name: '$5/day', amount: 5 },
+      { name: '$10/day', amount: 10 },
+      { name: '$25/day', amount: 25 },
+      { name: '$50/day', amount: 50 },
+      { name: '$100/day', amount: 100 },
+    ];
+
+    return scenarios.map(scenario => {
+      const projectedUsd = scenario.amount * totalDays;
+      const projectedBtc = projectedUsd / currentPrice;
+      const projectedSats = projectedBtc * 100_000_000;
+
+      return {
+        scenarioName: scenario.name,
+        dailyAmount: scenario.amount,
+        projectedSats: Math.round(projectedSats),
+        projectedBtc: projectedBtc,
+        projectedUsd: projectedUsd,
+      };
+    });
   }
 }

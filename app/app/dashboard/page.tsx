@@ -14,6 +14,8 @@ interface DailyEntry {
   score: number;
   path: string;
   created_at: string;
+  sats_purchased?: number;
+  btc_purchased?: number;
 }
 
 interface Profile {
@@ -187,16 +189,25 @@ function DashboardContent() {
         if (pathError) throw pathError;
         setPathDescription(pathData.display_name);
 
-        // Load Bitcoin portfolio data
-        const { data: portfolio } = await supabase
-          .from('bitcoin_portfolio')
-          .select('total_sats, total_btc')
-          .eq('user_id', session.user.id)
-          .single();
+        // Load Bitcoin portfolio data - sum all investments from daily_entries
+        const { data: allEntries, error: allEntriesError } = await supabase
+          .from('daily_entries')
+          .select('sats_purchased, btc_purchased')
+          .eq('user_id', session.user.id);
 
-        if (portfolio) {
-          setTotalSats(portfolio.total_sats || 0);
-          setTotalBtcInvested(portfolio.total_btc || 0);
+        if (allEntriesError) {
+          console.error('Error loading bitcoin data:', allEntriesError);
+        } else if (allEntries && allEntries.length > 0) {
+          const totalSatsSum = allEntries.reduce((sum, entry) => sum + (entry.sats_purchased || 0), 0);
+          const totalBtcSum = allEntries.reduce((sum, entry) => sum + (entry.btc_purchased || 0), 0);
+          setTotalSats(totalSatsSum);
+          setTotalBtcInvested(totalBtcSum);
+
+          console.log('🟠 Bitcoin Stats:', {
+            entries: allEntries.length,
+            totalSats: totalSatsSum,
+            totalBtc: totalBtcSum
+          });
         }
 
         setLoading(false);
