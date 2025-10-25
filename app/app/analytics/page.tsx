@@ -38,17 +38,18 @@ import {
   Target,
   Flame,
   Loader2,
-  LogOut,
   Menu,
   X,
   BarChart3,
   Bitcoin,
   Zap,
 } from 'lucide-react';
+import ProfileMenu from '@/app/components/ProfileMenu';
 
 export default function AdvancedAnalytics() {
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<30 | 60 | 90>(30);
+  const [timeRange, setTimeRange] = useState<30 | 90 | 180 | 365 | 'all'>(30);
+  const [dataLoadingMessage, setDataLoadingMessage] = useState('');
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [activityStats, setActivityStats] = useState<ActivityStats[]>([]);
   const [trendData, setTrendData] = useState<TrendData[]>([]);
@@ -61,6 +62,8 @@ export default function AdvancedAnalytics() {
   const [bitcoinAccumulation, setBitcoinAccumulation] = useState<BitcoinAccumulation[]>([]);
   const [bitcoinMilestones, setBitcoinMilestones] = useState<BitcoinMilestone[]>([]);
   const [dcaSimulations, setDcaSimulations] = useState<DCASimulation[]>([]);
+  const [session, setSession] = useState<{ user: { id: string; email?: string } } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; subscription_tier?: string; subscription_status?: string } | null>(null);
 
   const supabase = useMemo(() => createBrowserClient(), []);
   const router = useRouter();
@@ -82,15 +85,21 @@ export default function AdvancedAnalytics() {
         return;
       }
 
+      // Store session for ProfileMenu
+      setSession(session);
+
       // Check premium access
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from('profiles')
-        .select('subscription_tier, subscription_status')
+        .select('subscription_tier, subscription_status, full_name')
         .eq('id', session.user.id)
         .single();
 
-      const hasPremium = profile?.subscription_tier === 'premium' &&
-        profile?.subscription_status === 'active';
+      // Store profile for ProfileMenu
+      setProfile(profileData);
+
+      const hasPremium = profileData?.subscription_tier === 'premium' &&
+        profileData?.subscription_status === 'active';
 
       setIsPremium(hasPremium);
 
@@ -102,7 +111,15 @@ export default function AdvancedAnalytics() {
       // Calculate date range
       const endDate = new Date();
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - timeRange);
+
+      if (timeRange === 'all') {
+        // Set startDate to beginning of time (2000-01-01)
+        startDate.setFullYear(2000, 0, 1);
+        setDataLoadingMessage('Loading complete history...');
+      } else {
+        startDate.setDate(startDate.getDate() - timeRange);
+        setDataLoadingMessage(`Loading last ${timeRange} days...`);
+      }
 
       // Fetch entries
       const fetchedEntries = await AnalyticsEngine.getEntries(
@@ -110,6 +127,8 @@ export default function AdvancedAnalytics() {
         startDate,
         endDate
       );
+
+      setDataLoadingMessage('');
 
       setEntries(fetchedEntries);
 
@@ -147,7 +166,14 @@ export default function AdvancedAnalytics() {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 size={48} className="text-orange-500 animate-spin mx-auto mb-4" />
-          <p className="text-slate-400">Loading analytics...</p>
+          <p className="text-slate-400">
+            {dataLoadingMessage || 'Loading analytics...'}
+          </p>
+          {timeRange === 'all' && (
+            <p className="text-slate-500 text-sm mt-2">
+              This might take a moment for large datasets
+            </p>
+          )}
         </div>
       </div>
     );
@@ -186,13 +212,14 @@ export default function AdvancedAnalytics() {
                   </Link>
                 </div>
               </div>
-              <button
-                onClick={handleLogout}
-                className="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-              >
-                <LogOut size={20} />
-                <span>Logout</span>
-              </button>
+              <div className="hidden md:block">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           </div>
         </nav>
@@ -266,10 +293,39 @@ export default function AdvancedAnalytics() {
     ? Math.max(...entries.map(e => e.score))
     : 0;
 
+  // Helper to get readable time range text
+  const getTimeRangeText = () => {
+    if (timeRange === 'all') return 'All Time';
+    if (timeRange === 365) return '1 Year';
+    if (timeRange === 180) return '6 Months';
+    return `${timeRange} Days`;
+  };
+
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // For "All Time" or 1 Year, show abbreviated format
+    if (timeRange === 'all' || timeRange === 365) {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: '2-digit'
+      });
+    }
+
+    // For 6 months, show month/day
+    if (timeRange === 180) {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    // For 30/90 days, show full date
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   // Bitcoin formatting helpers
@@ -300,10 +356,12 @@ export default function AdvancedAnalytics() {
               <Link href="/app/dashboard" className="text-xl font-bold text-orange-500">
                 Sovereignty Tracker
               </Link>
-              <button onClick={handleLogout} className="flex items-center gap-2 text-slate-400 hover:text-white">
-                <LogOut size={20} />
-                <span>Logout</span>
-              </button>
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
             </div>
           </div>
         </nav>
@@ -359,14 +417,15 @@ export default function AdvancedAnalytics() {
               </div>
             </div>
 
-            {/* Desktop Logout */}
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
+            {/* Desktop Profile Menu */}
+            <div className="hidden md:block">
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -410,13 +469,14 @@ export default function AdvancedAnalytics() {
               >
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-slate-400 hover:bg-slate-700 rounded flex items-center gap-2"
-              >
-                <LogOut size={20} />
-                <span>Logout</span>
-              </button>
+              <div className="pt-3 border-t border-slate-700 px-4">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -426,43 +486,120 @@ export default function AdvancedAnalytics() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Advanced Analytics</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Advanced Analytics
+            {timeRange === 'all' && (
+              <span className="text-orange-500 ml-2">- Complete History</span>
+            )}
+            {timeRange !== 'all' && (
+              <span className="text-slate-400 text-xl ml-2">
+                ({timeRange} Days)
+              </span>
+            )}
+          </h1>
           <p className="text-slate-400 text-lg">Deep insights into your sovereignty journey</p>
         </div>
 
-        {/* Time Range Selector */}
-        <div className="mb-8 flex gap-3">
-          <button
-            onClick={() => setTimeRange(30)}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              timeRange === 30
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            30 Days
-          </button>
-          <button
-            onClick={() => setTimeRange(60)}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              timeRange === 60
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            60 Days
-          </button>
-          <button
-            onClick={() => setTimeRange(90)}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              timeRange === 90
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            90 Days
-          </button>
+        {/* Time Range Selector - Enhanced */}
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
+            Time Range
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setTimeRange(30)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                timeRange === 30
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+              }`}
+            >
+              30 Days
+            </button>
+            <button
+              onClick={() => setTimeRange(90)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                timeRange === 90
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+              }`}
+            >
+              90 Days
+            </button>
+            <button
+              onClick={() => setTimeRange(180)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                timeRange === 180
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+              }`}
+            >
+              6 Months
+            </button>
+            <button
+              onClick={() => setTimeRange(365)}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                timeRange === 365
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+              }`}
+            >
+              1 Year
+            </button>
+            <button
+              onClick={() => setTimeRange('all')}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                timeRange === 'all'
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+              }`}
+            >
+              All Time ⚡
+            </button>
+          </div>
+          <p className="text-slate-500 text-xs mt-2">
+            {timeRange === 'all'
+              ? `Showing your complete sovereignty journey`
+              : `Showing the last ${timeRange} days`}
+          </p>
         </div>
+
+        {/* Data Summary Badge */}
+        {entries.length > 0 && (
+          <div className="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 mb-6">
+            <Activity size={16} className="text-orange-500" />
+            <span className="text-white font-semibold">
+              {entries.length} {entries.length === 1 ? 'entry' : 'entries'} loaded
+            </span>
+            {timeRange === 'all' && (
+              <span className="text-slate-400 text-sm ml-2">
+                (Complete history)
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && entries.length === 0 && (
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center mb-8">
+            <Calendar size={64} className="text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No Data for {getTimeRangeText()}
+            </h3>
+            <p className="text-slate-400 mb-6">
+              {timeRange === 'all'
+                ? "You haven't logged any entries yet. Start tracking today!"
+                : `Try selecting a different time range or log your first entry.`
+              }
+            </p>
+            <Link
+              href="/app/entry"
+              className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Log Your First Entry
+            </Link>
+          </div>
+        )}
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -741,7 +878,7 @@ export default function AdvancedAnalytics() {
               </LineChart>
             </ResponsiveContainer>
             <p className="text-slate-400 text-sm mt-4 text-center">
-              📈 Your Bitcoin stack has grown to {bitcoinMetrics && formatSats(bitcoinMetrics.totalSats)} over {entries.length} days
+              📈 Your Bitcoin stack has grown to {bitcoinMetrics && formatSats(bitcoinMetrics.totalSats)} over {getTimeRangeText().toLowerCase()}
             </p>
           </div>
         )}
@@ -797,7 +934,7 @@ export default function AdvancedAnalytics() {
           <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
             <h2 className="text-xl font-bold text-white mb-4">💡 DCA Strategy Comparison</h2>
             <p className="text-slate-400 text-sm mb-6">
-              What if you had invested a fixed amount every day during your {entries.length}-day journey?
+              What if you had invested a fixed amount every day over {getTimeRangeText().toLowerCase()}?
               (Based on current BTC price: {formatUsd(bitcoinMetrics.currentPrice)})
             </p>
 

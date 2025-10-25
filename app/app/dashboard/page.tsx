@@ -5,8 +5,9 @@ import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getTodayLocalDate, getLocalDateDaysAgo, formatDateForDisplay, formatTimeForDisplay } from '@/lib/utils/date';
-import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, LogOut, Menu, X, Bitcoin, Zap, Sparkles } from 'lucide-react';
+import { Loader2, Flame, TrendingUp, CheckCircle, Calendar, Menu, X, Bitcoin, Zap, Sparkles } from 'lucide-react';
 import { BitcoinService } from '@/lib/services/bitcoin';
+import ProfileMenu from '@/app/components/ProfileMenu';
 
 interface DailyEntry {
   id: string;
@@ -37,6 +38,7 @@ function DashboardContent() {
   const supabase = useMemo(() => createBrowserClient(), []);
 
   // User data
+  const [session, setSession] = useState<{ user: { id: string; email?: string } } | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [todayEntry, setTodayEntry] = useState<DailyEntry | null>(null);
   const [recentEntries, setRecentEntries] = useState<DailyEntry[]>([]);
@@ -134,6 +136,9 @@ function DashboardContent() {
           router.push('/login');
           return;
         }
+
+        // Store session for ProfileMenu
+        setSession(session);
 
         // Load user profile
         const { data: profileData, error: profileError } = await supabase
@@ -283,16 +288,12 @@ function DashboardContent() {
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
-              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
-                Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
             </div>
 
             {/* Mobile Menu Button */}
@@ -325,13 +326,14 @@ function DashboardContent() {
               <Link href="/app/settings" className="block text-slate-300">
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <div className="pt-3 border-t border-slate-700">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           )}
         </div>

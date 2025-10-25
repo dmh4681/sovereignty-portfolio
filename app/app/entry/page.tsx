@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { calculateDailyScore, DailyActivities, PathConfig, getActivityPoints } from '@/lib/scoring';
 import { getTodayLocalDate, formatDateForDisplay } from '@/lib/utils/date';
-import { Loader2, Save, TrendingUp, Activity, LogOut, Menu, X, Info, Bitcoin } from 'lucide-react';
+import { Loader2, Save, TrendingUp, Activity, Menu, X, Info, Bitcoin } from 'lucide-react';
 import { getActivityDescription } from '@/lib/activity-descriptions';
 import { SovereigntyCalculator } from '@/lib/analytics/sovereignty-calculator';
+import ProfileMenu from '@/app/components/ProfileMenu';
 
 // Activity Tooltip Component
 interface ActivityTooltipProps {
@@ -72,6 +73,8 @@ export default function DailyEntryPage() {
   const supabase = useMemo(() => createBrowserClient(), []);
 
   // User and path data
+  const [session, setSession] = useState<{ user: { id: string; email?: string } } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; subscription_tier?: string; selected_path?: string } | null>(null);
   const [userId, setUserId] = useState<string>('');
   const [pathName, setPathName] = useState<string>('');
   const [pathConfig, setPathConfig] = useState<PathConfig | null>(null);
@@ -106,18 +109,23 @@ export default function DailyEntryPage() {
           return;
         }
 
+        // Store session for ProfileMenu
+        setSession(session);
         setUserId(session.user.id);
 
-        // Load user profile to get selected path
-        const { data: profile, error: profileError } = await supabase
+        // Load user profile to get selected path and subscription tier
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('selected_path')
+          .select('selected_path, full_name, subscription_tier')
           .eq('id', session.user.id)
           .single();
 
         if (profileError) throw profileError;
 
-        const selectedPath = profile.selected_path || 'default';
+        // Store profile for ProfileMenu
+        setProfile(profileData);
+
+        const selectedPath = profileData.selected_path || 'default';
         setPathName(selectedPath);
 
         // Load path configuration
@@ -323,16 +331,12 @@ export default function DailyEntryPage() {
               <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Paths
               </Link>
-              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
-                Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
             </div>
 
             {/* Mobile Menu Button */}
@@ -365,13 +369,14 @@ export default function DailyEntryPage() {
               <Link href="/app/settings" className="block text-slate-300">
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <div className="pt-3 border-t border-slate-700">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           )}
         </div>
