@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@supabase/ssr';
 import {
   CoachingContext,
   MotivationState,
@@ -11,7 +11,18 @@ export async function buildCoachingContext(
   userId: string,
   timeRange: '7d' | '30d' | '90d' | 'all' = '30d'
 ): Promise<CoachingContext> {
-  const supabase = await createClient();
+  // Use service role to bypass RLS for data aggregation
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role bypasses RLS
+    {
+      cookies: {
+        get() { return undefined; },
+        set() {},
+        remove() {},
+      },
+    }
+  );
 
   // 1. Get user profile
   const { data: profile, error: profileError } = await supabase

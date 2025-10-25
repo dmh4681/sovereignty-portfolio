@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles, TrendingUp, Target, Zap, RefreshCw } from 'lucide-react';
+import { createBrowserClient } from '@/lib/supabase/client';
 
 interface DataPoint {
   label: string;
@@ -56,23 +57,54 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
     setError(null);
 
     try {
+      // Step 1: Verify we have a valid session BEFORE calling the API
+      const supabase = createBrowserClient();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        throw new Error('Session error: ' + sessionError.message);
+      }
+
+      if (!session) {
+        console.error('❌ No session found');
+        throw new Error('No valid session found. Please log in again.');
+      }
+
+      console.log('✅ Client session verified:', {
+        userId: session.user.id,
+        email: session.user.email,
+        expiresAt: session.expires_at,
+      });
+
+      // Step 2: Call the API with verified session
+      console.log('📡 Calling Bitcoin Coach API...');
       const response = await fetch('/api/coaching/bitcoin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ timeRange }),
+        body: JSON.stringify({
+          timeRange,
+          userId: session.user.id // Pass userId explicitly
+        }),
+        credentials: 'include',
       });
+
+      console.log('📥 API response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || 'Failed to get coaching');
+        console.error('❌ API error response:', errorData);
+        throw new Error(errorData.details || `API error: ${response.status}`);
       }
 
       const data: ApiResponse = await response.json();
+      console.log('✅ Coaching received successfully');
       setCoaching(data.coaching);
       setMetadata(data.metadata);
     } catch (err) {
+      console.error('💥 Full error in getCoaching:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
@@ -103,9 +135,9 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-orange-500" />
-            <h2 className="text-2xl font-bold text-gray-900">Bitcoin Coach</h2>
+            <h2 className="text-2xl font-bold text-white">Bitcoin Coach</h2>
           </div>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-slate-400">
             AI-powered coaching for your sovereignty journey
           </p>
         </div>
@@ -287,12 +319,12 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
 
       {/* Empty State */}
       {!coaching && !loading && !error && (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
-          <Sparkles className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="text-center py-12 bg-slate-800 rounded-xl border border-slate-700">
+          <Sparkles className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">
             Ready for Personalized Coaching?
           </h3>
-          <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-slate-400 mb-6 max-w-md mx-auto">
             Get AI-powered insights about your Bitcoin accumulation, sovereignty score,
             and personalized recommendations to level up your journey.
           </p>
