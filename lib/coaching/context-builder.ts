@@ -9,7 +9,7 @@ import {
 
 export async function buildCoachingContext(
   userId: string,
-  timeRange: '7d' | '30d' | '90d' | 'all' = '30d'
+  timeRange: '7d' | '30d' | '90d' | 'year' | 'all' = '30d'
 ): Promise<CoachingContext> {
   // Use service role to bypass RLS for data aggregation
   const supabase = createServerClient(
@@ -35,18 +35,50 @@ export async function buildCoachingContext(
     throw new Error('User profile not found');
   }
 
-  // 2. Calculate date range
-  const endDate = new Date();
-  const startDate = new Date();
+    // 2. Calculate date range
+    const endDate = new Date();
+    let startDate = new Date();
 
-  let daysInRange: number;
-  if (timeRange === 'all') {
-    startDate.setFullYear(2000); // Beginning of time
-    daysInRange = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  } else {
-    daysInRange = parseInt(timeRange);
-    startDate.setDate(startDate.getDate() - daysInRange);
-  }
+    let daysInRange: number;
+
+    if (timeRange === 'all') {
+      // Query for user's first entry to get actual start date
+      const { data: firstEntry } = await supabase
+        .from('daily_entries')
+        .select('entry_date')
+        .eq('user_id', userId)
+        .order('entry_date', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (firstEntry) {
+        startDate = new Date(firstEntry.entry_date);
+        console.log('📅 All Time starts from first entry:', startDate.toISOString().split('T')[0]);
+      } else {
+        // Fallback if no entries exist
+        startDate.setDate(startDate.getDate() - 30);
+        console.log('⚠️ No entries found, using 30 days ago');
+      }
+      
+      // Calculate actual days between first entry and now
+      daysInRange = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+    } else if (timeRange === 'year') {
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      daysInRange = 365;
+      
+    } else {
+      // Handle day-based ranges (7d, 30d, 90d)
+      daysInRange = parseInt(timeRange);
+      startDate.setDate(startDate.getDate() - daysInRange);
+    }
+
+    console.log('📅 Date range:', {
+      start: startDate.toISOString().split('T')[0],
+      end: endDate.toISOString().split('T')[0],
+      days: daysInRange,
+      timeRange
+    });
 
   // 3. Fetch all entries in range
   const { data: entries, error: entriesError } = await supabase

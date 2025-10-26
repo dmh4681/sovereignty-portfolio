@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
     console.log('✅ Processing coaching request for user:', verifiedUserId);
 
     // 2. Validate timeRange
-    if (!['7d', '30d', '90d', 'all'].includes(timeRange)) {
+    if (!['7d', '30d', '90d', 'year', 'all'].includes(timeRange)) {
       return NextResponse.json(
-        { error: 'Invalid timeRange. Must be one of: 7d, 30d, 90d, all' },
+        { error: 'Invalid timeRange. Must be one of: 7d, 30d, 90d, year, all' },
         { status: 400 }
       );
     }
@@ -164,9 +164,8 @@ export async function POST(request: NextRequest) {
         },
         raw_response: coachingResponse,
         message: coachingResponse.message,
-        
+
         // Optional metadata fields
-        context_days: timeRange,
         prompt_version: '1.0',
         model: 'claude-sonnet-4-20250514',
         

@@ -4,8 +4,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import BitcoinCoach from '@/app/components/coaching/BitcoinCoach';
+import CoachingHistory from '@/app/components/coaching/CoachingHistory';
 import ProfileMenu from '@/app/components/ProfileMenu';
-import { Loader2, Lock, Menu, X } from 'lucide-react';
+import { Loader2, Lock, Menu, X, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CoachingPage() {
@@ -14,6 +15,8 @@ export default function CoachingPage() {
   const [profile, setProfile] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const router = useRouter();
 
   // Memoize Supabase client to prevent Multiple GoTrueClient instances
@@ -51,6 +54,11 @@ export default function CoachingPage() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/');
+  };
+
+  // Callback when new coaching is generated
+  const handleNewCoaching = () => {
+    setHistoryRefreshKey(prev => prev + 1);
   };
 
   if (loading) {
@@ -281,16 +289,38 @@ export default function CoachingPage() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            AI Coaching
-          </h1>
-          <p className="text-slate-400">
-            Get personalized insights and recommendations from your Bitcoin sovereignty coach.
-          </p>
+        {/* Header */}
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              AI Coaching
+            </h1>
+            <p className="text-slate-400">
+              Get personalized insights and recommendations from your Bitcoin sovereignty coach.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-700"
+          >
+            <Clock className="h-4 w-4" />
+            {showHistory ? 'Hide' : 'Show'} History
+          </button>
         </div>
 
-        <BitcoinCoach timeRange="30d" />
+        {/* Main Content */}
+        <div className="space-y-8">
+          <BitcoinCoach
+            onNewCoaching={handleNewCoaching}
+          />
+
+          {showHistory && (
+            <div className="pt-8 border-t border-slate-700">
+              <CoachingHistory refreshTrigger={historyRefreshKey} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

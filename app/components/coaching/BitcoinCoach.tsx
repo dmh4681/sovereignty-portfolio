@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Sparkles, TrendingUp, Target, Zap, RefreshCw } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase/client';
+import ShareCoaching from './ShareCoaching';
 
 interface DataPoint {
   label: string;
@@ -43,14 +44,15 @@ interface ApiResponse {
 }
 
 interface BitcoinCoachProps {
-  timeRange?: '7d' | '30d' | '90d' | 'all';
+  onNewCoaching?: () => void;
 }
 
-export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
+export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
   const [coaching, setCoaching] = useState<CoachingResponse | null>(null);
   const [metadata, setMetadata] = useState<ApiResponse['metadata'] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'7d' | '30d' | '90d' | 'year' | 'all'>('30d');
 
   // Memoize Supabase client to prevent Multiple GoTrueClient instances
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -87,7 +89,7 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          timeRange,
+          timeRange: selectedTimeRange,
           userId: session.user.id // Pass userId explicitly
         }),
         credentials: 'include',
@@ -105,6 +107,11 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
       console.log('✅ Coaching received successfully');
       setCoaching(data.coaching);
       setMetadata(data.metadata);
+
+      // Trigger history refresh callback
+      if (onNewCoaching) {
+        onNewCoaching();
+      }
     } catch (err) {
       console.error('💥 Full error in getCoaching:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -133,7 +140,7 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-orange-500" />
@@ -144,23 +151,46 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
           </p>
         </div>
 
-        <button
-          onClick={getCoaching}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <>
-              <RefreshCw className="h-4 w-4 animate-spin" />
-              Analyzing...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" />
-              Get Coaching
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Time Range Selector */}
+          <div className="relative">
+            <select
+              value={selectedTimeRange}
+              onChange={(e) => setSelectedTimeRange(e.target.value as '7d' | '30d' | '90d' | 'year' | 'all')}
+              className="appearance-none bg-slate-800 text-white text-sm px-4 py-2 pr-10 rounded-lg border border-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+            >
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="90d">Last Quarter</option>
+              <option value="year">Last Year</option>
+              <option value="all">All Time</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Get Coaching Button */}
+          <button
+            onClick={getCoaching}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            {loading ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Get Coaching
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Error State */}
@@ -174,7 +204,12 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
 
       {/* Coaching Response */}
       {coaching && metadata && (
-        <div className="space-y-6">
+        <div id="coaching-container" className="space-y-6">
+          {/* Share Button */}
+          <div className="flex justify-end">
+            <ShareCoaching coaching={coaching} metadata={metadata} />
+          </div>
+
           {/* Metadata Bar */}
           <div className="flex items-center gap-4 text-xs text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
             <span>Analyzed {metadata.daysAnalyzed} days</span>
