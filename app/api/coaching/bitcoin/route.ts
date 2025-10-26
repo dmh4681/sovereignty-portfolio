@@ -74,29 +74,94 @@ export async function POST(request: NextRequest) {
 
     let coachingResponse;
     try {
-      // Claude should return pure JSON (we instructed it in the prompt)
-      coachingResponse = JSON.parse(contentBlock.text);
+      // Try to parse Claude's response as JSON
+      let jsonText = contentBlock.text.trim();
+      
+      // Remove markdown code blocks if Claude added them despite instructions
+      jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // Parse the JSON
+      coachingResponse = JSON.parse(jsonText);
+      
     } catch (parseError) {
-      console.error('Failed to parse Claude response as JSON:', contentBlock.text);
-      throw new Error('Invalid JSON response from AI coach');
+      console.error('❌ Failed to parse Claude response as JSON:', contentBlock.text);
+      
+      // Try aggressive cleanup to recover
+      let fixedText = contentBlock.text.trim();
+      
+      // Remove markdown
+      fixedText = fixedText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // Fix common JSON errors:
+      // 1. Missing commas between fields (pattern: "text"\n  "field":)
+      fixedText = fixedText.replace(/("\s*)\n(\s*"[a-zA-Z_]+":)/g, '$1,$2');
+      
+      // 2. Orphaned text strings (pattern: "text"\n  "random text")
+      fixedText = fixedText.replace(/("\s*)\n(\s*"[^"]+"\s*\n\s*"[a-zA-Z_]+":)/g, '$1,$2');
+      
+      // 3. Multiple strings in a row (merge into one with newlines)
+      fixedText = fixedText.replace(/"([^"]+)"\s*\n\s*"([^"]+)"\s*\n\s*"([a-zA-Z_]+)":/g, (match, str1, str2, field) => {
+        if (!field.includes('insights') && !field.includes('dataPoints')) {
+          return `"${str1}\\n\\n${str2}",\n  "${field}":`;
+        }
+        return match;
+      });
+      
+      console.log('🔧 Attempting JSON repair...');
+      
+      try {
+        coachingResponse = JSON.parse(fixedText);
+        console.log('✅ Successfully recovered from malformed JSON!');
+      } catch (secondError) {
+        console.error('💥 Still cannot parse JSON after cleanup attempt');
+        console.error('Original:', contentBlock.text);
+        console.error('After cleanup:', fixedText);
+        
+        // Last resort: return a friendly error to the user
+        throw new Error('AI coach returned invalid format. Please try again.');
+      }
     }
 
     // 7. Save coaching session to database
-    const { error: insertError } = await supabase
-      .from('coaching_sessions')
-      .insert({
-        user_id: verifiedUserId,
-        coach_type: 'bitcoin_coach',
-        context_days: timeRange,
-        prompt_version: '1.0',
-        model: 'claude-sonnet-4-20250514',
-        response: coachingResponse,
-        recommendation: coachingResponse.recommendation?.action || null,
-      });
+    try {
+      const { data: savedSession, error: insertError } = await supabase
+        .from('coaching_sessions')
+        .insert({
+          user_id: verifiedUserId,
+          coach_type: 'bitcoin_coach',
+          context_days: timeRange,
+          prompt_version: '1.0',
+          model: 'claude-sonnet-4-20250514',
+          raw_response: coachingResponse,
+          recommendation: coachingResponse.recommendation?.action || null,
+        })
+        .select()
+        .single();
 
-    if (insertError) {
-      console.error('Error saving coaching session:', insertError);
-      // Don't fail the request if we can't save to DB
+      if (insertError) {
+        console.error('❌ Error saving coaching session:', {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+        });
+        
+        // Check if it's an RLS policy error
+        if (insertError.code === '42501' || insertError.message?.includes('policy')) {
+          console.error('🔒 RLS Policy Error - Check your Supabase policies!');
+          console.error('💡 Make sure you have an INSERT policy that allows users to create their own sessions');
+        }
+      } else {
+        console.log('✅ Coaching session saved to database:', {
+          id: savedSession?.id,
+          userId: verifiedUserId,
+          timestamp: savedSession?.created_at,
+        });
+      }
+    } catch (dbError) {
+      console.error('💥 Database save failed with exception:', dbError);
+      // Continue anyway - user still gets the coaching even if save fails
     }
 
     // 8. Return coaching response

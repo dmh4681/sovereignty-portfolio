@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Sparkles, TrendingUp, Target, Zap, RefreshCw } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase/client';
 
@@ -52,13 +52,15 @@ export default function BitcoinCoach({ timeRange = '30d' }: BitcoinCoachProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize Supabase client to prevent Multiple GoTrueClient instances
+  const supabase = useMemo(() => createBrowserClient(), []);
+
   const getCoaching = async () => {
     setLoading(true);
     setError(null);
 
     try {
       // Step 1: Verify we have a valid session BEFORE calling the API
-      const supabase = createBrowserClient();
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {

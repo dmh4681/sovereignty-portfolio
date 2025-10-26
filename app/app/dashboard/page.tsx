@@ -282,6 +282,9 @@ function DashboardContent() {
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
               </Link>
+              <Link href="/app/coaching" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Coaching
+              </Link>
               <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Sovereignty
               </Link>
@@ -316,6 +319,9 @@ function DashboardContent() {
               </Link>
               <Link href="/app/analytics" className="block text-slate-300">
                 Analytics
+              </Link>
+              <Link href="/app/coaching" className="block text-slate-300">
+                Coaching
               </Link>
               <Link href="/app/sovereignty" className="block text-slate-300">
                 Sovereignty

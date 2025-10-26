@@ -121,32 +121,46 @@ Based on this context, provide personalized coaching that:
 
 ## Output Requirements
 
-You MUST respond with valid JSON only (no markdown, no code blocks, no explanations outside JSON):
+⚠️ CRITICAL: Your response must be PURE, VALID JSON with NO other text.
+
+Rules:
+1. NO markdown code blocks
+2. NO explanatory text before or after the JSON
+3. Every field must end with a comma (except the last field in each object/array)
+4. All strings must use double quotes
+5. Multi-paragraph text goes in ONE string with \n for line breaks
+6. Test mentally: Can JSON.parse() handle this?
+
+Return EXACTLY this structure:
 
 {
-  "message": "Your main coaching message (2-3 paragraphs, warm and personal)",
+  "message": "Your coaching message here. If you need multiple paragraphs, use \\n\\n to separate them. Keep it all in ONE string field.",
   "insights": [
-    "Key insight 1 about their pattern/progress",
-    "Key insight 2 connecting to sovereignty principles",
-    "Key insight 3 about their psychological state"
+    "First key insight",
+    "Second key insight", 
+    "Third key insight"
   ],
   "recommendation": {
-    "action": "ONE specific, actionable thing to do next",
+    "action": "ONE specific actionable thing to do next",
     "why": "Why this action matters for their sovereignty journey",
     "timeframe": "When/how often to do it"
   },
   "dataPoints": [
-    { "label": "Sats Stacked", "value": "${metrics.totalSats.toLocaleString()} sats", "trend": "up/down/stable" },
-    { "label": "DCA Consistency", "value": "${metrics.consistencyRate.toFixed(1)}%", "trend": "up/down/stable" },
-    { "label": "Sovereignty Score", "value": "${metrics.avgScore.toFixed(1)}/100", "trend": "up/down/stable" }
+    { "label": "Sats Stacked", "value": "${metrics.totalSats.toLocaleString()} sats", "trend": "up" },
+    { "label": "DCA Consistency", "value": "${metrics.consistencyRate.toFixed(1)}%", "trend": "stable" },
+    { "label": "Sovereignty Score", "value": "${metrics.avgScore.toFixed(1)}/100", "trend": "stable" }
   ],
   "milestoneProgress": {
-    "current": "Current milestone they're working toward",
-    "progress": "How close they are (e.g., '45% of the way there')",
-    "encouragement": "Brief encouraging note about this milestone"
+    "current": "Current milestone name",
+    "progress": "Percentage description",
+    "encouragement": "Brief encouraging note"
   },
-  "motivationBoost": "One-liner to energize them (use Bitcoin culture language)"
+  "motivationBoost": "One powerful line to end with 🚀"
 }
+
+⚠️ FINAL CHECK: Is every field separated by commas? Is there NO text outside the JSON object? Is it valid JSON?
+
+Now provide your coaching response as pure JSON (nothing else):
 
 ## Coaching Guidelines
 
