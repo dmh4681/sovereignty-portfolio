@@ -76,9 +76,7 @@ Timeframe: ${coaching.recommendation.timeframe}
         throw new Error('Coaching container not found');
       }
 
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#0f172a',
-      });
+      const canvas = await html2canvas(element);
 
       canvas.toBlob((blob) => {
         if (!blob) {
