@@ -58,7 +58,6 @@ export default function PathsPage() {
         if (profileError) throw profileError;
 
         setCurrentPath(profile.selected_path);
-        setUserName(profile.full_name?.split(' ')[0] || 'Friend');
 
         // Load all paths
         const { data: pathsData, error: pathsError } = await supabase
