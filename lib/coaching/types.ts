@@ -118,6 +118,7 @@ export interface RecentEntry {
   investment_amount_usd: number;
   sats_purchased: number;
   home_cooked_meals: number;
+  exercise_minutes: number;
   strength_training: boolean;
   meditation: boolean;
   gratitude: boolean;

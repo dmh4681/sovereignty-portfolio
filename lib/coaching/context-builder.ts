@@ -109,6 +109,7 @@ export async function buildCoachingContext(
     investment_amount_usd: entry.investment_amount_usd || 0,
     sats_purchased: entry.sats_purchased || 0,
     home_cooked_meals: entry.home_cooked_meals || 0,
+    exercise_minutes: entry.exercise_minutes || 0,
     strength_training: entry.strength_training || false,
     meditation: entry.meditation || false,
     gratitude: entry.gratitude || false,
