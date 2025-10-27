@@ -4,9 +4,32 @@ import { useState } from 'react';
 import { Share2, Copy, Check, Image as ImageIcon } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
+interface DataPoint {
+  label: string;
+  value: string;
+}
+
+interface Recommendation {
+  action: string;
+  why?: string;
+  timeframe?: string;
+}
+
+interface Coaching {
+  message: string;
+  dataPoints: DataPoint[];
+  insights: string[];
+  recommendation: Recommendation;
+  motivationBoost: string;
+}
+
+interface Metadata {
+  timeRange: string;
+}
+
 interface ShareCoachingProps {
-  coaching: any;
-  metadata: any;
+  coaching: Coaching;
+  metadata: Metadata;
 }
 
 export default function ShareCoaching({ coaching, metadata }: ShareCoachingProps) {
@@ -20,7 +43,7 @@ export default function ShareCoaching({ coaching, metadata }: ShareCoachingProps
 ${coaching.message}
 
 📊 Key Metrics:
-${coaching.dataPoints.map((d: any) => `• ${d.label}: ${d.value}`).join('\n')}
+${coaching.dataPoints.map((d) => `• ${d.label}: ${d.value}`).join('\n')}
 
 💡 Key Insights:
 ${coaching.insights.map((i: string) => `• ${i}`).join('\n')}

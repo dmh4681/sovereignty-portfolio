@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Shield, CheckCircle, TrendingUp, ArrowRight, LogOut, Menu, X } from 'lucide-react';
+import { Loader2, Shield, CheckCircle, TrendingUp, LogOut, Menu, X } from 'lucide-react';
 
 interface PathData {
   name: string;
@@ -37,7 +37,6 @@ export default function PathsPage() {
 
   const [currentPath, setCurrentPath] = useState('');
   const [paths, setPaths] = useState<PathData[]>([]);
-  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     async function loadPaths() {

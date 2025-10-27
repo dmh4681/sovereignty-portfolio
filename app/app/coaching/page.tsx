@@ -9,11 +9,24 @@ import ProfileMenu from '@/app/components/ProfileMenu';
 import { Loader2, Lock, Menu, X, Clock } from 'lucide-react';
 import Link from 'next/link';
 
+interface Profile {
+  full_name?: string;
+  subscription_tier?: string;
+  subscription_status?: string;
+}
+
+interface Session {
+  user: {
+    id: string;
+    email?: string;
+  };
+}
+
 export default function CoachingPage() {
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
-  const [session, setSession] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);

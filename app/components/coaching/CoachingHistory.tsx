@@ -1,15 +1,30 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Clock, TrendingUp, Target, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase/client';
+
+interface RawResponse {
+  dataPoints?: Array<{
+    label: string;
+    value: string;
+    trend?: string;
+  }>;
+  insights?: string[];
+  recommendation?: {
+    action: string;
+    why?: string;
+    timeframe?: string;
+  };
+  motivationBoost?: string;
+}
 
 interface CoachingSession {
   id: string;
   created_at: string;
   coach_type: string;
   time_range: string;
-  raw_response: any;
+  raw_response: RawResponse;
   recommendation: string;
   message: string;
 }
@@ -27,11 +42,7 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
   // Memoize Supabase client
   const supabase = useMemo(() => createBrowserClient(), []);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [refreshTrigger]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -60,7 +71,11 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [refreshTrigger, fetchHistory]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -182,7 +197,7 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
                 {/* Data Points */}
                 {session.raw_response?.dataPoints && session.raw_response.dataPoints.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {session.raw_response.dataPoints.map((point: any, i: number) => (
+                    {session.raw_response.dataPoints.map((point, i: number) => (
                       <div key={i} className="bg-slate-900 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-medium text-slate-400">
