@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -11,7 +10,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createBrowserClient();
 
   const handleLogin = async (e: React.FormEvent) => {
