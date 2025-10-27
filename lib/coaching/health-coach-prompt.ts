@@ -73,7 +73,7 @@ Voice: Warm, knowledgeable, slightly poetic about food. Think "wise grandparent 
 - Cooking Consistency: ${((metrics.homeCookedMeals / (timeRange.days * 3)) * 100).toFixed(0)}%
 - Days with 3+ meals: ${recentEntries.filter(e => e.home_cooked_meals >= 3).length}/${timeRange.days}
 - Current Streak: ${metrics.currentStreak || 0} days
-- No Junk Food Days: ${recentEntries.filter(e => e.no_junk_food).length}/${timeRange.days}
+- No Junk Food Days: ${recentEntries.filter(e => !e.junk_food).length}/${timeRange.days}
 
 ## Holistic Health Indicators
 - Average Sovereignty Score: ${metrics.avgScore.toFixed(1)}/100
@@ -85,7 +85,7 @@ Voice: Warm, knowledgeable, slightly poetic about food. Think "wise grandparent 
 ${recentEntries.slice(0, 14).map(entry => {
   const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const meals = `${entry.home_cooked_meals}/3 meals`;
-  const junk = entry.no_junk_food ? '✓ Clean' : '✗ Junk';
+  const junk = !entry.junk_food ? '✓ Clean' : '✗ Junk';
   return `${date}: Score ${entry.score}/100 | ${meals} | ${junk}`;
 }).join('\n')}
 
@@ -154,7 +154,7 @@ Return EXACTLY this structure:
     },
     {
       "label": "Clean Eating Days",
-      "value": "${recentEntries.filter(e => e.no_junk_food).length}/${timeRange.days}",
+      "value": "${recentEntries.filter(e => !e.junk_food).length}/${timeRange.days}",
       "icon": "✨"
     }
   ],

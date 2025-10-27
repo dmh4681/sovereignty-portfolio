@@ -122,6 +122,7 @@ export interface RecentEntry {
   meditation: boolean;
   gratitude: boolean;
   no_spending: boolean;
+  junk_food: boolean;
 }
 
 export interface DailyEntry {

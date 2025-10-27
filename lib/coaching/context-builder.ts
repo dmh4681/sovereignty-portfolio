@@ -112,7 +112,8 @@ export async function buildCoachingContext(
     strength_training: entry.strength_training || false,
     meditation: entry.meditation || false,
     gratitude: entry.gratitude || false,
-    no_spending: entry.no_spending || false
+    no_spending: entry.no_spending || false,
+    junk_food: entry.junk_food || false
   }));
 
   // 7. Calculate achievements
