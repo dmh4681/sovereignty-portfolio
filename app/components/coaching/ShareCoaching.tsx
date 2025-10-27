@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Share2, Copy, Check, Image as ImageIcon } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import { domToPng } from 'modern-screenshot';
 
 interface DataPoint {
   label: string;
@@ -76,27 +76,33 @@ Timeframe: ${coaching.recommendation.timeframe}
         throw new Error('Coaching container not found');
       }
 
-      const canvas = await html2canvas(element);
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          alert('Failed to generate image');
-          setExporting(false);
-          return;
+      // Use modern-screenshot instead of html2canvas
+      const dataUrl = await domToPng(element, {
+        backgroundColor: '#0f172a',
+        scale: 2,
+        quality: 0.95,
+        style: {
+          // Ensure proper rendering
+          transform: 'scale(1)',
         }
+      });
 
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        const date = new Date().toISOString().split('T')[0];
-        link.href = url;
-        link.download = `bitcoin-coaching-${date}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        setExporting(false);
-        setShowMenu(false);
-      }, 'image/png');
+      // Convert data URL to blob and download
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const date = new Date().toISOString().split('T')[0];
+      link.href = url;
+      link.download = `bitcoin-coaching-${date}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setExporting(false);
+      setShowMenu(false);
     } catch (error) {
       console.error('Export error:', error);
       alert('Failed to export image. Please try again.');
