@@ -71,7 +71,7 @@ Voice: Intense but supportive, high-energy but practical. Think "coach who pushe
 - Total Exercise Minutes: ${metrics.exerciseMinutes}
 - Avg Exercise/Day: ${(metrics.exerciseMinutes / timeRange.days).toFixed(0)} minutes
 - Training Frequency: ${(metrics.strengthTrainingDays / (timeRange.days / 7)).toFixed(1)}x per week
-- Current Strength Streak: ${metrics.strengthStreak || 0} days
+- Current Streak: ${metrics.currentStreak || 0} days
 - Workout Consistency: ${metrics.strengthTrainingDays >= (timeRange.days * 0.5) ? 'EXCELLENT' : metrics.strengthTrainingDays >= (timeRange.days * 0.3) ? 'GOOD' : 'NEEDS IMPROVEMENT'}
 
 ## Supporting Recovery Factors

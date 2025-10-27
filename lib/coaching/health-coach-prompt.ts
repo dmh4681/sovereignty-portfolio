@@ -72,7 +72,7 @@ Voice: Warm, knowledgeable, slightly poetic about food. Think "wise grandparent 
 - Home-Cooked Meals: ${metrics.homeCookedMeals} total (avg ${metrics.avgMealsPerDay.toFixed(1)}/day)
 - Cooking Consistency: ${((metrics.homeCookedMeals / (timeRange.days * 3)) * 100).toFixed(0)}%
 - Days with 3+ meals: ${recentEntries.filter(e => e.home_cooked_meals >= 3).length}/${timeRange.days}
-- Current Meal Streak: ${metrics.mealStreak || 0} days
+- Current Streak: ${metrics.currentStreak || 0} days
 - No Junk Food Days: ${recentEntries.filter(e => e.no_junk_food).length}/${timeRange.days}
 
 ## Holistic Health Indicators
