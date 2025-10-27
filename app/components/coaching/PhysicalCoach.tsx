@@ -4,13 +4,42 @@ import { useState } from 'react';
 import { Sparkles, RefreshCw, Dumbbell } from 'lucide-react';
 import ShareCoaching from './ShareCoaching';
 
+interface DataPoint {
+  label: string;
+  value: string;
+  icon: string;
+}
+
+interface Recommendation {
+  action: string;
+  why: string;
+  timeframe: string;
+}
+
+interface CoachingResponse {
+  message: string;
+  dataPoints: DataPoint[];
+  insights: string[];
+  recommendation: Recommendation;
+  motivationBoost: string;
+}
+
+interface CoachingMetadata {
+  coachType: string;
+  timeRange: string;
+  daysAnalyzed: number;
+  trainingDays: number;
+  exerciseMinutes: number;
+  motivationState: string;
+}
+
 interface PhysicalCoachProps {
   userId: string;
 }
 
 export default function PhysicalCoach({ userId }: PhysicalCoachProps) {
-  const [coaching, setCoaching] = useState<any>(null);
-  const [metadata, setMetadata] = useState<any>(null);
+  const [coaching, setCoaching] = useState<CoachingResponse | null>(null);
+  const [metadata, setMetadata] = useState<CoachingMetadata | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>('30d');
@@ -145,7 +174,7 @@ export default function PhysicalCoach({ userId }: PhysicalCoachProps) {
 
           {/* Data Points Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {coaching.dataPoints.map((point: any, i: number) => (
+            {coaching.dataPoints.map((point: DataPoint, i: number) => (
               <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-2xl">{point.icon}</span>
