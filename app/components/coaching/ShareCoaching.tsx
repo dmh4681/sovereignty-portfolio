@@ -77,7 +77,7 @@ Timeframe: ${coaching.recommendation.timeframe}
       }
 
       const canvas = await html2canvas(element, {
-        backgroundColor: '#0f172a',
+        background: '#0f172a',
         scale: 2,
         logging: false,
         useCORS: true,
