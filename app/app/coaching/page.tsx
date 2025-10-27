@@ -4,6 +4,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import BitcoinCoach from '@/app/components/coaching/BitcoinCoach';
+import HealthCoach from '@/app/components/coaching/HealthCoach';
+import PhysicalCoach from '@/app/components/coaching/PhysicalCoach';
+import CoachSelector, { CoachType } from '@/app/components/coaching/CoachSelector';
 import CoachingHistory from '@/app/components/coaching/CoachingHistory';
 import ProfileMenu from '@/app/components/ProfileMenu';
 import { Loader2, Lock, Menu, X, Clock } from 'lucide-react';
@@ -30,6 +33,7 @@ export default function CoachingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [selectedCoach, setSelectedCoach] = useState<CoachType>('bitcoin');
   const router = useRouter();
 
   // Memoize Supabase client to prevent Multiple GoTrueClient instances
@@ -173,7 +177,7 @@ export default function CoachingPage() {
               AI Coaching
             </h1>
             <p className="text-slate-400">
-              Get personalized insights and recommendations from your Bitcoin sovereignty coach.
+              Get personalized insights and recommendations from your sovereignty coaches
             </p>
           </div>
 
@@ -186,24 +190,24 @@ export default function CoachingPage() {
               Premium Feature
             </h2>
             <p className="text-slate-400 mb-6 max-w-md mx-auto">
-              AI Coaching is available exclusively for Premium members. Upgrade to unlock personalized coaching powered by Claude AI.
+              AI Coaching is available exclusively for Premium members. Upgrade to unlock personalized coaching across all sovereignty domains.
             </p>
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-center gap-2 text-slate-300">
-                <span className="text-orange-500">✓</span>
-                <span>Personalized Bitcoin accumulation insights</span>
+                <span className="text-orange-500">₿</span>
+                <span>Bitcoin Coach - Financial sovereignty insights</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-slate-300">
+                <span className="text-green-500">🥗</span>
+                <span>Health Coach - Nutritional sovereignty guidance</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-slate-300">
+                <span className="text-red-500">💪</span>
+                <span>Physical Trainer - Training and recovery coaching</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-slate-300">
                 <span className="text-orange-500">✓</span>
-                <span>Psychology-aware coaching recommendations</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 text-slate-300">
-                <span className="text-orange-500">✓</span>
-                <span>Track progress toward sats milestones</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 text-slate-300">
-                <span className="text-orange-500">✓</span>
-                <span>Advanced analytics and unlimited history</span>
+                <span>Psychology-aware recommendations for all coaches</span>
               </div>
             </div>
             <Link
@@ -309,7 +313,7 @@ export default function CoachingPage() {
               AI Coaching
             </h1>
             <p className="text-slate-400">
-              Get personalized insights and recommendations from your Bitcoin sovereignty coach.
+              Get personalized insights and recommendations from your sovereignty coaches
             </p>
           </div>
 
@@ -322,11 +326,27 @@ export default function CoachingPage() {
           </button>
         </div>
 
+        {/* Coach Selector */}
+        <CoachSelector
+          selectedCoach={selectedCoach}
+          onSelectCoach={setSelectedCoach}
+        />
+
         {/* Main Content */}
         <div className="space-y-8">
-          <BitcoinCoach
-            onNewCoaching={handleNewCoaching}
-          />
+          {selectedCoach === 'bitcoin' && (
+            <BitcoinCoach
+              onNewCoaching={handleNewCoaching}
+            />
+          )}
+
+          {selectedCoach === 'health' && session?.user?.id && (
+            <HealthCoach userId={session.user.id} />
+          )}
+
+          {selectedCoach === 'physical' && session?.user?.id && (
+            <PhysicalCoach userId={session.user.id} />
+          )}
 
           {showHistory && (
             <div className="pt-8 border-t border-slate-700">

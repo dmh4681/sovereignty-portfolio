@@ -30,15 +30,22 @@ interface Metadata {
 interface ShareCoachingProps {
   coaching: Coaching;
   metadata: Metadata;
+  coachType?: 'bitcoin' | 'health' | 'physical';
 }
 
-export default function ShareCoaching({ coaching, metadata }: ShareCoachingProps) {
+export default function ShareCoaching({ coaching, metadata, coachType = 'bitcoin' }: ShareCoachingProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const copyAsText = async () => {
-    const text = `🎯 Bitcoin Sovereignty Coaching (${metadata.timeRange})
+    const coachNames = {
+      bitcoin: 'Bitcoin Sovereignty Coaching',
+      health: 'Health & Nutrition Coaching',
+      physical: 'Physical Training Coaching',
+    };
+
+    const text = `🎯 ${coachNames[coachType]} (${metadata.timeRange})
 
 ${coaching.message}
 
@@ -79,7 +86,13 @@ Timeframe: ${coaching.recommendation.timeframe}
     await new Promise(resolve => setTimeout(resolve, 50));
 
     try {
-      const element = document.getElementById('coaching-container');
+      const containerIds = {
+        bitcoin: 'coaching-container',
+        health: 'health-coaching-container',
+        physical: 'physical-coaching-container',
+      };
+
+      const element = document.getElementById(containerIds[coachType]);
       if (!element) {
         throw new Error('Coaching container not found');
       }
@@ -103,7 +116,7 @@ Timeframe: ${coaching.recommendation.timeframe}
       const link = document.createElement('a');
       const date = new Date().toISOString().split('T')[0];
       link.href = url;
-      link.download = `bitcoin-coaching-${date}.png`;
+      link.download = `${coachType}-coaching-${date}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
