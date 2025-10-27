@@ -602,7 +602,7 @@ function identifyRisksAndStrengths(entries: DailyEntry[], metrics: ReturnType<ty
   return { riskFactors, strengthAreas };
 }
 
-function generateMotivationIndicators(motivationState: MotivationState, metrics: ReturnType<typeof calculateMetrics>): string[] {
+function generateMotivationIndicators(motivationState: MotivationState, _metrics: ReturnType<typeof calculateMetrics>): string[] {
   const indicators: string[] = [];
 
   switch (motivationState) {

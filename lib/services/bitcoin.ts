@@ -35,7 +35,7 @@ export class BitcoinService {
           source: 'coinbase'
         };
       }
-    } catch (error) {
+    } catch {
       console.warn('Coinbase API failed, trying CoinGecko...');
     }
 
