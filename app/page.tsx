@@ -68,7 +68,7 @@ const HomePage = () => {
               Systems Built for Sovereignty
             </h1>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              I build AI-powered systems that give organizations control over their data and individuals control over their lives.
+              AI-powered systems that give organizations control over their data and their future, and individuals control over their lives.
             </p>
           </div>
 
@@ -102,7 +102,7 @@ const HomePage = () => {
                   </li>
                   <li className="flex items-center text-slate-400">
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mr-3" />
-                    Data Strategy Consulting
+                    AI and Data Strategy Consulting
                   </li>
                 </ul>
 
