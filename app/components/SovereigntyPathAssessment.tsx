@@ -420,7 +420,7 @@ const SovereigntyPathAssessment = () => {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <Sparkles className="w-16 h-16 text-orange-500 mx-auto mb-4" />
-            <h1 className="text-4xl font-bold mb-4">Your Sovereignty Path</h1>
+            <h1 className="text-4xl font-bold mb-4">Your Sovereignty Tracker</h1>
             <p className="text-slate-400">Based on your responses, here&apos;s your recommended path forward</p>
           </div>
 

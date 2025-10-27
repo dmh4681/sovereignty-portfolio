@@ -70,6 +70,14 @@ Timeframe: ${coaching.recommendation.timeframe}
 
   const exportAsImage = async () => {
     setExporting(true);
+
+    // CRITICAL: Hide the share menu before capturing
+    const wasMenuOpen = showMenu;
+    setShowMenu(false);
+
+    // Wait for React to re-render without the menu
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     try {
       const element = document.getElementById('coaching-container');
       if (!element) {
@@ -102,11 +110,20 @@ Timeframe: ${coaching.recommendation.timeframe}
       URL.revokeObjectURL(url);
 
       setExporting(false);
-      setShowMenu(false);
+
+      // Restore menu state if it was open
+      if (wasMenuOpen) {
+        setShowMenu(true);
+      }
     } catch (error) {
       console.error('Export error:', error);
       alert('Failed to export image. Please try again.');
       setExporting(false);
+
+      // Restore menu state on error too
+      if (wasMenuOpen) {
+        setShowMenu(true);
+      }
     }
   };
 

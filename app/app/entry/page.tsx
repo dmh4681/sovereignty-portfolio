@@ -311,7 +311,7 @@ export default function DailyEntryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/app/dashboard" className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-              Sovereignty Path
+              Sovereignty Tracker
             </Link>
 
             {/* Desktop Navigation */}
@@ -324,6 +324,9 @@ export default function DailyEntryPage() {
               </Link>
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
+              </Link>
+              <Link href="/app/coaching" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Coaching
               </Link>
               <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Sovereignty
@@ -359,6 +362,9 @@ export default function DailyEntryPage() {
               </Link>
               <Link href="/app/analytics" className="block text-slate-300">
                 Analytics
+              </Link>
+              <Link href="/app/coaching" className="block text-slate-300">
+                Coaching
               </Link>
               <Link href="/app/sovereignty" className="block text-slate-300">
                 Sovereignty

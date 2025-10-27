@@ -164,7 +164,7 @@ export function SovereigntyManifestoContent() {
       </p>
 
       <div className="bg-orange-500/10 border border-orange-500/30 p-6 my-8 rounded-lg">
-        <p className="font-semibold text-orange-400 mb-2">The Sovereignty Path Thesis:</p>
+        <p className="font-semibold text-orange-400 mb-2">The Sovereignty Tracker Thesis:</p>
         <p className="text-slate-300">
           If you systematically track the metrics that matter for sovereignty across all six paths, and you review that data daily with the goal of incremental improvement, you will become more sovereign over time. It&apos;s not magic. It&apos;s physics.
         </p>
@@ -266,7 +266,7 @@ export function SovereigntyManifestoContent() {
       </p>
 
       <p className="text-lg font-semibold text-orange-500 mt-8">
-        The Sovereignty Path exists to help you build option two. Track your sovereignty. See your progress. Make better choices. Compound small wins into freedom.
+        The Sovereignty Tracker exists to help you build option two. Track your sovereignty. See your progress. Make better choices. Compound small wins into freedom.
       </p>
 
       <p className="text-slate-400 italic mt-4">

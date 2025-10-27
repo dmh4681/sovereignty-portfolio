@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Shield, CheckCircle, TrendingUp, LogOut, Menu, X } from 'lucide-react';
+import { Loader2, Shield, CheckCircle, TrendingUp, Menu, X } from 'lucide-react';
+import ProfileMenu from '@/app/components/ProfileMenu';
 
 interface PathData {
   name: string;
@@ -25,11 +26,27 @@ interface PathData {
   };
 }
 
+interface Profile {
+  full_name?: string;
+  selected_path: string;
+  subscription_tier?: string;
+  subscription_status?: string;
+}
+
+interface Session {
+  user: {
+    id: string;
+    email?: string;
+  };
+}
+
 export default function PathsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [switching, setSwitching] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
 
   // Memoize supabase client to prevent multiple instances
@@ -48,15 +65,18 @@ export default function PathsPage() {
           return;
         }
 
+        setSession(session);
+
         // Load user profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('selected_path, full_name')
+          .select('selected_path, full_name, subscription_tier, subscription_status')
           .eq('id', session.user.id)
           .single();
 
         if (profileError) throw profileError;
 
+        setProfile(profile);
         setCurrentPath(profile.selected_path);
 
         // Load all paths
@@ -254,7 +274,7 @@ export default function PathsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/app/dashboard" className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-              Sovereignty Path
+              Sovereignty Tracker
             </Link>
 
             {/* Desktop Navigation */}
@@ -268,22 +288,21 @@ export default function PathsPage() {
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
               </Link>
+              <Link href="/app/coaching" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Coaching
+              </Link>
               <Link href="/app/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Sovereignty
               </Link>
               <Link href="/app/paths" className="text-orange-500 font-semibold">
                 Paths
               </Link>
-              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
-                Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300 hover:text-orange-500 transition-colors"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
             </div>
 
             {/* Mobile Menu Button */}
@@ -307,6 +326,9 @@ export default function PathsPage() {
               <Link href="/app/analytics" className="block text-slate-300">
                 Analytics
               </Link>
+              <Link href="/app/coaching" className="block text-slate-300">
+                Coaching
+              </Link>
               <Link href="/app/sovereignty" className="block text-slate-300">
                 Sovereignty
               </Link>
@@ -316,13 +338,14 @@ export default function PathsPage() {
               <Link href="/app/settings" className="block text-slate-300">
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-300"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <div className="pt-3 border-t border-slate-700">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           )}
         </div>

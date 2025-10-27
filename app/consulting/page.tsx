@@ -64,7 +64,7 @@ const ConsultingPage = () => {
       tech: ['Power BI', 'DAX', 'Dimensional Modeling', 'QuickBooks', 'Salesforce', 'Recurly']
     },
     {
-      client: 'The Sovereignty Path',
+      client: 'The Sovereignty Tracker',
       title: 'Habit Tracking & Lifestyle System',
       challenge: 'Build comprehensive system helping people reclaim control over health, finances, and future through daily sovereignty practices.',
       solution: 'Complete philosophy-driven application with 6 specialized paths, dynamic scoring engine, meal planning, financial modeling, and Bitcoin integration.',
@@ -382,7 +382,7 @@ const ConsultingPage = () => {
               <ul className="text-slate-400 space-y-2">
                 <li className="flex items-start">
                   <ChevronRight size={16} className="text-orange-500 mr-2 mt-1 flex-shrink-0" />
-                  <span><strong>Speed:</strong> AI helps me build in days what traditionally takes weeks. The Sovereignty Path app? Built in days, not months.</span>
+                  <span><strong>Speed:</strong> AI helps me build in days what traditionally takes weeks. The Sovereignty Tracker app? Built in days, not months.</span>
                 </li>
                 <li className="flex items-start">
                   <ChevronRight size={16} className="text-orange-500 mr-2 mt-1 flex-shrink-0" />

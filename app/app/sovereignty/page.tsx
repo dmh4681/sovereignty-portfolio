@@ -15,10 +15,10 @@ import {
   DollarSign,
   Target,
   Loader2,
-  LogOut,
   Menu,
   X
 } from 'lucide-react';
+import ProfileMenu from '@/app/components/ProfileMenu';
 
 interface InvestmentRecord {
   id: string;
@@ -29,12 +29,27 @@ interface InvestmentRecord {
   sats_purchased: number;
 }
 
+interface Profile {
+  full_name?: string;
+  subscription_tier?: string;
+  subscription_status?: string;
+}
+
+interface Session {
+  user: {
+    id: string;
+    email?: string;
+  };
+}
+
 export default function SovereigntyDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [metrics, setMetrics] = useState<SovereigntyMetrics | null>(null);
   const [investmentHistory, setInvestmentHistory] = useState<InvestmentRecord[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
 
   // Memoize supabase client to prevent multiple instances
@@ -57,13 +72,16 @@ export default function SovereigntyDashboard() {
       }
 
       console.log('Session found, user ID:', session.user.id);
+      setSession(session);
 
       // Check if user has premium access
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_tier, subscription_status')
+        .select('full_name, subscription_tier, subscription_status')
         .eq('id', session.user.id)
         .single();
+
+      setProfile(profile);
 
       console.log('Sovereignty page - checking access:', profile);
 
@@ -149,22 +167,21 @@ export default function SovereigntyDashboard() {
               <Link href="/app/analytics" className="text-slate-300 hover:text-orange-500 transition-colors">
                 Analytics
               </Link>
-              <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
-                Paths
+              <Link href="/app/coaching" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Coaching
               </Link>
               <Link href="/app/sovereignty" className="text-orange-500 font-medium">
                 Sovereignty
               </Link>
-              <Link href="/app/settings" className="text-slate-300 hover:text-orange-500 transition-colors">
-                Settings
+              <Link href="/app/paths" className="text-slate-300 hover:text-orange-500 transition-colors">
+                Paths
               </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors"
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
+              <ProfileMenu
+                userName={profile?.full_name || 'User'}
+                userEmail={session?.user?.email || ''}
+                subscriptionTier={profile?.subscription_tier}
+                onSignOut={handleLogout}
+              />
             </div>
 
             {/* Mobile menu button */}
@@ -180,7 +197,7 @@ export default function SovereigntyDashboard() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden pb-4">
+            <div className="md:hidden pb-4 space-y-1">
               <Link
                 href="/app/dashboard"
                 className="block py-2 text-slate-300 hover:text-orange-500"
@@ -203,11 +220,11 @@ export default function SovereigntyDashboard() {
                 Analytics
               </Link>
               <Link
-                href="/app/paths"
+                href="/app/coaching"
                 className="block py-2 text-slate-300 hover:text-orange-500"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Paths
+                Coaching
               </Link>
               <Link
                 href="/app/sovereignty"
@@ -217,18 +234,27 @@ export default function SovereigntyDashboard() {
                 Sovereignty
               </Link>
               <Link
+                href="/app/paths"
+                className="block py-2 text-slate-300 hover:text-orange-500"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Paths
+              </Link>
+              <Link
                 href="/app/settings"
                 className="block py-2 text-slate-300 hover:text-orange-500"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Settings
               </Link>
-              <button
-                onClick={handleLogout}
-                className="block py-2 text-red-400 w-full text-left"
-              >
-                Logout
-              </button>
+              <div className="pt-3 border-t border-slate-700">
+                <ProfileMenu
+                  userName={profile?.full_name || 'User'}
+                  userEmail={session?.user?.email || ''}
+                  subscriptionTier={profile?.subscription_tier}
+                  onSignOut={handleLogout}
+                />
+              </div>
             </div>
           )}
         </div>

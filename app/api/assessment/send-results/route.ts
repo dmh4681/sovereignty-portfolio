@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       messages: [
         {
           role: "system",
-          content: `You are the Sovereignty Path Coach. Generate personalized guidance for someone named ${name} whose primary path is ${primaryPath.name} and secondary path is ${secondPath.name}.
+          content: `You are the Sovereignty Tracker Coach. Generate personalized guidance for someone named ${name} whose primary path is ${primaryPath.name} and secondary path is ${secondPath.name}.
 
 Write a motivating 2-3 paragraph email that:
 1. Starts with "Hey ${name}," as the greeting
@@ -165,7 +165,7 @@ Create your free account and start tracking your daily sovereignty:
 
 "Sovereignty is built through daily discipline, not grand gestures."
 
-- The Sovereignty Path Team
+- The Sovereignty Tracker Team
     `.trim();
 
     // Send email via Mailgun
@@ -177,9 +177,9 @@ Create your free account and start tracking your daily sovereignty:
           'Authorization': `Basic ${Buffer.from(`api:${process.env.MAILGUN_API_KEY}`).toString('base64')}`,
         },
         body: new URLSearchParams({
-          from: `Sovereignty Path <noreply@${process.env.MAILGUN_DOMAIN}>`,
+          from: `Sovereignty Tracker <noreply@${process.env.MAILGUN_DOMAIN}>`,
           to: email,
-          subject: `Your Sovereignty Path: ${primaryPath.name}`,
+          subject: `Your Sovereignty Tracker: ${primaryPath.name}`,
           text: emailBody,
         })
       }

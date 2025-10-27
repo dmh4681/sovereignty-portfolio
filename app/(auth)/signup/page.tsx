@@ -77,7 +77,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-              Sovereignty Path
+              Sovereignty Tracker
             </h1>
           </Link>
           <p className="text-slate-400 mt-2">

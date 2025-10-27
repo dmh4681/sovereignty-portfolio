@@ -268,7 +268,7 @@ function DashboardContent() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/app/dashboard" className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-              Sovereignty Path
+              Sovereignty Tracker
             </Link>
 
             {/* Desktop Navigation */}

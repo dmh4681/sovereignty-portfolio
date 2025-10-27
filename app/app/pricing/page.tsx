@@ -34,7 +34,7 @@ export default function PricingPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4">Choose Your Sovereignty Path</h1>
+          <h1 className="text-5xl font-bold mb-4">Choose Your Sovereignty Tracker</h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
             Start free, upgrade when you&apos;re ready for AI-powered coaching and advanced analytics
           </p>

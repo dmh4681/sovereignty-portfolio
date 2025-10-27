@@ -540,7 +540,7 @@ const SovereigntyLandingPage = () => {
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-8">
             <Shield size={16} className="text-amber-500" />
-            <span className="text-amber-500 text-sm font-semibold">The Sovereignty Path</span>
+            <span className="text-amber-500 text-sm font-semibold">The Sovereignty Tracker</span>
           </div>
 
           <h1 className="text-5xl sm:text-7xl font-bold mb-6 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent">
@@ -646,7 +646,7 @@ const SovereigntyLandingPage = () => {
           <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-center">
             <div>
               <p className="text-4xl md:text-5xl font-bold text-orange-500 mb-2">6</p>
-              <p className="text-slate-400 text-sm md:text-base">Sovereignty Paths</p>
+              <p className="text-slate-400 text-sm md:text-base">Sovereignty Trackers</p>
             </div>
             <div className="w-px bg-slate-700" />
             <div>
@@ -756,7 +756,7 @@ const SovereigntyLandingPage = () => {
       <footer className="bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-slate-400 mb-2">
-            © 2025 The Sovereignty Path. Built for clarity, designed for freedom.
+            © 2025 The Sovereignty Tracker. Built for clarity, designed for freedom.
           </p>
           <p className="text-slate-500 text-sm italic">
             &ldquo;Sovereignty is built through daily discipline, not grand gestures.&rdquo;

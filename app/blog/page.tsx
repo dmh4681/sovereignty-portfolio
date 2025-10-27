@@ -29,7 +29,7 @@ export default function BlogIndexPage() {
               Consulting
             </Link>
             <Link href="/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
-              Sovereignty Path
+              Sovereignty Tracker
             </Link>
           </nav>
         </div>

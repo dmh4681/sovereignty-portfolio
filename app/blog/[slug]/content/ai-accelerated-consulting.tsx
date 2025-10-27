@@ -200,7 +200,7 @@ export function AIAcceleratedConsultingContent() {
         </div>
 
         <div className="bg-slate-800 p-6 rounded-lg border-l-4 border-orange-500">
-          <h3 className="text-xl font-bold mb-3">The Sovereignty Path: Full-Stack Application</h3>
+          <h3 className="text-xl font-bold mb-3">The Sovereignty Tracker: Full-Stack Application</h3>
           <p className="text-slate-300 text-sm mb-4">
             <strong>Challenge:</strong> Build comprehensive habit tracking system with 6 specialized paths, scoring engine, meal planning, and Bitcoin integration.
           </p>

@@ -201,6 +201,9 @@ export default function AdvancedAnalytics() {
                   <Link href="/app/analytics" className="text-orange-500 font-semibold">
                     Analytics
                   </Link>
+                  <Link href="/app/coaching" className="text-slate-300 hover:text-white transition-colors">
+                    Coaching
+                  </Link>
                   <Link href="/app/sovereignty" className="text-slate-300 hover:text-white transition-colors">
                     Sovereignty
                   </Link>
@@ -405,6 +408,9 @@ export default function AdvancedAnalytics() {
                 <Link href="/app/analytics" className="text-orange-500 font-semibold">
                   Analytics
                 </Link>
+                <Link href="/app/coaching" className="text-slate-300 hover:text-white transition-colors">
+                  Coaching
+                </Link>
                 <Link href="/app/sovereignty" className="text-slate-300 hover:text-white transition-colors">
                   Sovereignty
                 </Link>
@@ -456,6 +462,18 @@ export default function AdvancedAnalytics() {
                 className="block px-4 py-2 text-orange-500 bg-slate-700 rounded font-semibold"
               >
                 Analytics
+              </Link>
+              <Link
+                href="/app/coaching"
+                className="block px-4 py-2 text-slate-300 hover:bg-slate-700 rounded"
+              >
+                Coaching
+              </Link>
+              <Link
+                href="/app/sovereignty"
+                className="block px-4 py-2 text-slate-300 hover:bg-slate-700 rounded"
+              >
+                Sovereignty
               </Link>
               <Link
                 href="/app/paths"

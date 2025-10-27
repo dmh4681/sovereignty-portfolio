@@ -21,7 +21,7 @@ const HomePage = () => {
               Consulting
             </Link>
             <Link href="/sovereignty" className="text-slate-300 hover:text-orange-500 transition-colors">
-              Sovereignty Path
+              Sovereignty Tracker
             </Link>
 
             {/* Divider */}
@@ -113,7 +113,7 @@ const HomePage = () => {
               </div>
             </Link>
 
-            {/* Sovereignty Path */}
+            {/* Sovereignty Tracker */}
             <Link href="/sovereignty" className="group">
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-700 hover:border-amber-500 rounded-2xl p-8 transition-all hover:shadow-2xl hover:shadow-amber-500/20 h-full">
                 <div className="flex items-center gap-4 mb-6">
@@ -122,7 +122,7 @@ const HomePage = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">For Individuals</h2>
-                    <p className="text-slate-400">The Sovereignty Path</p>
+                    <p className="text-slate-400">The Sovereignty Tracker</p>
                   </div>
                 </div>
                 
