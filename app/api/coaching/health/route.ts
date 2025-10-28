@@ -70,19 +70,60 @@ export async function POST(request: NextRequest) {
       throw new Error('AI coach returned invalid format. Please try again.');
     }
 
-    // Store in database
-    const { error: insertError } = await supabase
-      .from('coaching_sessions')
-      .insert({
-        user_id: verifiedUserId,
-        coach_type: 'health',
-        time_range: timeRange,
-        coaching_data: coachingResponse,
-        created_at: new Date().toISOString(),
-      });
+    // Store in database using service role to bypass RLS
+    console.log('💾 Storing health coaching session...');
+    try {
+      const { createServerClient } = await import('@supabase/ssr');
 
-    if (insertError) {
-      console.error('Failed to store coaching session:', insertError);
+      const adminClient = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          cookies: {
+            get() { return undefined; },
+            set() {},
+            remove() {},
+          },
+        }
+      );
+
+      const { data: savedSession, error: insertError } = await adminClient
+        .from('coaching_sessions')
+        .insert({
+          // Required fields
+          user_id: verifiedUserId,
+          coach_type: 'health',
+          time_range: timeRange,
+          context_data: {
+            user: context.user,
+            timeRange: context.timeRange,
+            metrics: context.metrics,
+            psychology: context.psychology,
+          },
+          raw_response: coachingResponse,
+          message: coachingResponse.message || '',
+
+          // Optional fields
+          insights: coachingResponse.insights || null,
+          recommendation: coachingResponse.recommendation?.action || null,
+          data_points: coachingResponse.dataPoints || null,
+          motivation_state: context.psychology.motivationState || null,
+          habit_phase: context.psychology.habitPhase || null,
+          coaching_need: context.psychology.coachingNeed || null,
+          context_days: timeRange,
+          prompt_version: '1.0',
+          model: 'claude-sonnet-4-20250514',
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ Failed to store coaching session:', insertError);
+      } else {
+        console.log('✅ Health coaching session stored with ID:', savedSession?.id);
+      }
+    } catch (dbError) {
+      console.error('💥 Database save failed:', dbError);
     }
 
     // Return coaching
