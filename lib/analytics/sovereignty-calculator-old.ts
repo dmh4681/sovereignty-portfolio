@@ -31,6 +31,9 @@ export interface SovereigntyMetrics {
 }
 
 export class SovereigntyCalculator {
+  /**
+   * Get current Bitcoin price
+   */
   static async getBitcoinPrice(): Promise<number | null> {
     try {
       const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
@@ -43,15 +46,32 @@ export class SovereigntyCalculator {
     }
   }
 
+  /**
+   * Calculate comprehensive sovereignty metrics for a user
+   */
   static async calculateMetrics(userId: string): Promise<SovereigntyMetrics | null> {
     const supabase = createBrowserClient();
 
+    // Get current Bitcoin price
     const btcPriceData = await BitcoinService.getCurrentPrice();
     if (!btcPriceData) {
       throw new Error('Unable to fetch Bitcoin price');
     }
     const btcPrice = btcPriceData.priceUsd;
 
+    // Get user profile with financial data
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('monthly_fixed_expenses, monthly_variable_expenses, other_assets_usd')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Error fetching profile:', profileError);
+      return null;
+    }
+
+    // Get Bitcoin portfolio - sum all investments from daily_entries
     const { data: allEntries } = await supabase
       .from('daily_entries')
       .select('sats_purchased, btc_purchased')
@@ -60,54 +80,27 @@ export class SovereigntyCalculator {
     const totalSats = allEntries?.reduce((sum, entry) => sum + (entry.sats_purchased || 0), 0) || 0;
     const totalBtc = allEntries?.reduce((sum, entry) => sum + (entry.btc_purchased || 0), 0) || 0;
     const btcValueUsd = BitcoinService.btcToUsd(totalBtc, btcPrice);
+    const otherAssetsUsd = profile.other_assets_usd || 0;
+    const totalNetWorth = btcValueUsd + otherAssetsUsd;
 
-    // Get assets (order by updated_at to get most recent)
-    const { data: assetsArray } = await supabase
-      .from('user_assets')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(1);
+    // Calculate expenses
+    const monthlyFixedExpenses = profile.monthly_fixed_expenses || 0;
+    const monthlyVariableExpenses = profile.monthly_variable_expenses || 0;
+    const annualFixedExpenses = monthlyFixedExpenses * 12;
+    const annualTotalExpenses = (monthlyFixedExpenses + monthlyVariableExpenses) * 12;
 
-    const assets = assetsArray && assetsArray.length > 0 ? assetsArray[0] : null;
+    // Calculate ratios
+    const sovereigntyRatio = annualFixedExpenses > 0
+      ? btcValueUsd / annualFixedExpenses
+      : 0;
 
-    const otherCryptoUsd = assets?.other_crypto_usd || 0;
-    const traditionalInvestments = (assets?.retirement_accounts_usd || 0) + (assets?.brokerage_accounts_usd || 0);
-    const cashLiquid = (assets?.checking_savings_usd || 0) + (assets?.emergency_fund_usd || 0);
-    const realAssets = (assets?.home_equity_usd || 0) + (assets?.vehicles_usd || 0) + (assets?.other_real_assets_usd || 0);
-    const totalDebt = (assets?.mortgage_balance || 0) + (assets?.auto_loans || 0) +
-                      (assets?.student_loans || 0) + (assets?.credit_card_debt || 0) + (assets?.other_debt || 0);
+    const fullSovereigntyRatio = annualTotalExpenses > 0
+      ? totalNetWorth / annualTotalExpenses
+      : 0;
 
-    const totalCryptoValue = btcValueUsd + otherCryptoUsd;
-    const totalAssets = totalCryptoValue + traditionalInvestments + cashLiquid + realAssets;
-    const otherAssetsUsd = totalAssets - btcValueUsd; // All non-Bitcoin assets
-    const totalNetWorth = totalAssets - totalDebt;
-
-    // Get expenses (order by updated_at to get most recent)
-    const { data: expensesArray } = await supabase
-      .from('user_expenses')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-      .limit(1);
-
-    const expenses = expensesArray && expensesArray.length > 0 ? expensesArray[0] : null;
-
-    const annualFixedExpenses = (expenses?.housing_annual || 0) + (expenses?.utilities_annual || 0) +
-                                 (expenses?.insurance_annual || 0) + (expenses?.debt_payments_annual || 0) +
-                                 (expenses?.subscriptions_annual || 0);
-
-    const annualVariableExpenses = (expenses?.food_annual || 0) + (expenses?.transportation_annual || 0) +
-                                    (expenses?.discretionary_annual || 0) + (expenses?.other_variable_annual || 0);
-
-    const annualTotalExpenses = annualFixedExpenses + annualVariableExpenses;
-    const monthlyFixedExpenses = annualFixedExpenses / 12;
-    const monthlyVariableExpenses = annualVariableExpenses / 12;
-
-    const sovereigntyRatio = annualFixedExpenses > 0 ? totalCryptoValue / annualFixedExpenses : 0;
-    const fullSovereigntyRatio = annualTotalExpenses > 0 ? totalNetWorth / annualTotalExpenses : 0;
     const yearsOfRunway = fullSovereigntyRatio;
 
+    // Determine status
     const { status, emoji, color } = this.calculateStatus(fullSovereigntyRatio);
 
     return {
@@ -131,33 +124,67 @@ export class SovereigntyCalculator {
     };
   }
 
+  /**
+   * Calculate sovereignty status based on years of runway
+   */
   private static calculateStatus(ratio: number): {
     status: SovereigntyMetrics['sovereigntyStatus'];
     emoji: string;
     color: string;
   } {
     if (ratio >= 20) {
-      return { status: 'Generationally Sovereign', emoji: '🟩', color: 'text-green-400' };
+      return {
+        status: 'Generationally Sovereign',
+        emoji: '🟩',
+        color: 'text-green-400'
+      };
     } else if (ratio >= 6) {
-      return { status: 'Antifragile', emoji: '🟢', color: 'text-green-500' };
+      return {
+        status: 'Antifragile',
+        emoji: '🟢',
+        color: 'text-green-500'
+      };
     } else if (ratio >= 3) {
-      return { status: 'Robust', emoji: '🟡', color: 'text-yellow-500' };
+      return {
+        status: 'Robust',
+        emoji: '🟡',
+        color: 'text-yellow-500'
+      };
     } else if (ratio >= 1) {
-      return { status: 'Fragile', emoji: '🔴', color: 'text-red-500' };
+      return {
+        status: 'Fragile',
+        emoji: '🔴',
+        color: 'text-red-500'
+      };
     } else {
-      return { status: 'Vulnerable', emoji: '⚫', color: 'text-slate-500' };
+      return {
+        status: 'Vulnerable',
+        emoji: '⚫',
+        color: 'text-slate-500'
+      };
     }
   }
 
-  static async recordInvestment(userId: string, amountUsd: number, investmentDate: Date = new Date()): Promise<boolean> {
+  /**
+   * Update Bitcoin portfolio after an investment
+   */
+  static async recordInvestment(
+    userId: string,
+    amountUsd: number,
+    investmentDate: Date = new Date()
+  ): Promise<boolean> {
     const supabase = createBrowserClient();
+
+    // Get current price
     const btcPriceData = await BitcoinService.getCurrentPrice();
     if (!btcPriceData) {
       throw new Error('Unable to fetch Bitcoin price');
     }
 
+    // Calculate purchase
     const purchase = BitcoinService.calculatePurchase(amountUsd, btcPriceData.priceUsd);
 
+    // Record investment
     const { error: investmentError } = await supabase
       .from('bitcoin_investments')
       .insert({
@@ -174,6 +201,7 @@ export class SovereigntyCalculator {
       return false;
     }
 
+    // Update portfolio totals
     const { data: portfolio } = await supabase
       .from('bitcoin_portfolio')
       .select('total_btc, total_sats')
@@ -203,6 +231,9 @@ export class SovereigntyCalculator {
     return true;
   }
 
+  /**
+   * Get investment history from daily_entries
+   */
   static async getInvestmentHistory(userId: string, limit: number = 30) {
     const supabase = createBrowserClient();
 
@@ -219,6 +250,7 @@ export class SovereigntyCalculator {
       return [];
     }
 
+    // Transform to match expected format
     return (data || []).map(entry => ({
       id: entry.id,
       investment_date: entry.entry_date,

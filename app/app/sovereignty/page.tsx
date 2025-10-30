@@ -16,9 +16,14 @@ import {
   Target,
   Loader2,
   Menu,
-  X
+  X,
+  BarChart3,
+  Wallet,
+  Receipt
 } from 'lucide-react';
 import ProfileMenu from '@/app/components/ProfileMenu';
+import AssetInputForm from '@/app/components/sovereignty/AssetInputForm';
+import ExpenseInputForm from '@/app/components/sovereignty/ExpenseInputForm';
 
 interface InvestmentRecord {
   id: string;
@@ -42,6 +47,8 @@ interface Session {
   };
 }
 
+type Tab = 'overview' | 'assets' | 'expenses';
+
 export default function SovereigntyDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,6 +57,7 @@ export default function SovereigntyDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
   const router = useRouter();
 
   // Memoize supabase client to prevent multiple instances
@@ -116,6 +124,19 @@ export default function SovereigntyDashboard() {
     await supabase.auth.signOut();
     router.push('/');
   };
+
+  const refreshMetrics = async () => {
+    if (session?.user.id) {
+      const calculatedMetrics = await SovereigntyCalculator.calculateMetrics(session.user.id);
+      setMetrics(calculatedMetrics);
+    }
+  };
+
+  const tabs = [
+    { id: 'overview' as Tab, label: 'Overview', icon: BarChart3 },
+    { id: 'assets' as Tab, label: 'Assets & Debt', icon: Wallet },
+    { id: 'expenses' as Tab, label: 'Expenses', icon: Receipt },
+  ];
 
   if (loading) {
     return (
@@ -273,290 +294,354 @@ export default function SovereigntyDashboard() {
             </p>
           </div>
 
-          {/* Bitcoin Price Banner */}
-          <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg p-4 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bitcoin className="w-8 h-8 text-white" />
-                <div>
-                  <p className="text-white text-sm font-medium">Bitcoin Price</p>
-                  <p className="text-white text-2xl font-bold">
-                    {BitcoinService.formatUsd(metrics.btcPrice)}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-white text-sm opacity-90">
-                  Last updated: {new Date(metrics.lastUpdated).toLocaleTimeString()}
-                </p>
-              </div>
+          {/* Tab Navigation */}
+          <div className="bg-slate-800 rounded-xl p-2 mb-6 border border-slate-700">
+            <div className="flex gap-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-orange-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Sovereignty Status Card - PROMINENT */}
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 mb-8">
-            <div className="text-center mb-6">
-              <div className="text-8xl mb-4">{metrics.statusEmoji}</div>
-              <h2 className={`text-4xl font-bold mb-2 ${metrics.statusColor}`}>
-                {metrics.sovereigntyStatus}
-              </h2>
-              <p className="text-slate-400 text-lg">
-                {metrics.yearsOfRunway.toFixed(1)} years of runway
-              </p>
-            </div>
+          {/* Tab Content - Overview */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Bitcoin Price Banner */}
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg p-4 mb-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bitcoin className="w-8 h-8 text-white" />
+                    <div>
+                      <p className="text-white text-sm font-medium">Bitcoin Price</p>
+                      <p className="text-white text-2xl font-bold">
+                        {BitcoinService.formatUsd(metrics.btcPrice)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white text-sm opacity-90">
+                      Last updated: {new Date(metrics.lastUpdated).toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-slate-700 rounded-full h-4 mb-4">
-              <div
-                className={`h-4 rounded-full transition-all ${
-                  metrics.yearsOfRunway >= 20 ? 'bg-green-400' :
-                  metrics.yearsOfRunway >= 6 ? 'bg-green-500' :
-                  metrics.yearsOfRunway >= 3 ? 'bg-yellow-500' :
-                  metrics.yearsOfRunway >= 1 ? 'bg-red-500' :
-                  'bg-slate-500'
-                }`}
-                style={{ width: `${Math.min(metrics.yearsOfRunway / 20 * 100, 100)}%` }}
-              />
-            </div>
+              {/* Sovereignty Status Card - PROMINENT */}
+              <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 mb-8">
+                <div className="text-center mb-6">
+                  <div className="text-8xl mb-4">{metrics.statusEmoji}</div>
+                  <h2 className={`text-4xl font-bold mb-2 ${metrics.statusColor}`}>
+                    {metrics.sovereigntyStatus}
+                  </h2>
+                  <p className="text-slate-400 text-lg">
+                    {metrics.yearsOfRunway.toFixed(1)} years of runway
+                  </p>
+                </div>
 
-            {/* Status Thresholds */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
-              <div>
-                <div className="text-slate-500 font-bold">⚫</div>
-                <div className="text-slate-400">Vulnerable</div>
-                <div className="text-slate-500 text-xs">&lt; 1 year</div>
-              </div>
-              <div>
-                <div className="text-red-500 font-bold">🔴</div>
-                <div className="text-slate-400">Fragile</div>
-                <div className="text-slate-500 text-xs">1-3 years</div>
-              </div>
-              <div>
-                <div className="text-yellow-500 font-bold">🟡</div>
-                <div className="text-slate-400">Robust</div>
-                <div className="text-slate-500 text-xs">3-6 years</div>
-              </div>
-              <div>
-                <div className="text-green-500 font-bold">🟢</div>
-                <div className="text-slate-400">Antifragile</div>
-                <div className="text-slate-500 text-xs">6-20 years</div>
-              </div>
-              <div>
-                <div className="text-green-400 font-bold">🟩</div>
-                <div className="text-slate-400">Generational</div>
-                <div className="text-slate-500 text-xs">20+ years</div>
-              </div>
-            </div>
-          </div>
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-700 rounded-full h-4 mb-4">
+                  <div
+                    className={`h-4 rounded-full transition-all ${
+                      metrics.yearsOfRunway >= 20 ? 'bg-green-400' :
+                      metrics.yearsOfRunway >= 6 ? 'bg-green-500' :
+                      metrics.yearsOfRunway >= 3 ? 'bg-yellow-500' :
+                      metrics.yearsOfRunway >= 1 ? 'bg-red-500' :
+                      'bg-slate-500'
+                    }`}
+                    style={{ width: `${Math.min(metrics.yearsOfRunway / 20 * 100, 100)}%` }}
+                  />
+                </div>
 
-          {/* Metrics Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Bitcoin Holdings Card */}
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-4">
-                <Bitcoin className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Bitcoin Holdings</h3>
+                {/* Status Thresholds */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
+                  <div>
+                    <div className="text-slate-500 font-bold">⚫</div>
+                    <div className="text-slate-400">Vulnerable</div>
+                    <div className="text-slate-500 text-xs">&lt; 1 year</div>
+                  </div>
+                  <div>
+                    <div className="text-red-500 font-bold">🔴</div>
+                    <div className="text-slate-400">Fragile</div>
+                    <div className="text-slate-500 text-xs">1-3 years</div>
+                  </div>
+                  <div>
+                    <div className="text-yellow-500 font-bold">🟡</div>
+                    <div className="text-slate-400">Robust</div>
+                    <div className="text-slate-500 text-xs">3-6 years</div>
+                  </div>
+                  <div>
+                    <div className="text-green-500 font-bold">🟢</div>
+                    <div className="text-slate-400">Antifragile</div>
+                    <div className="text-slate-500 text-xs">6-20 years</div>
+                  </div>
+                  <div>
+                    <div className="text-green-400 font-bold">🟩</div>
+                    <div className="text-slate-400">Generational</div>
+                    <div className="text-slate-500 text-xs">20+ years</div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-slate-400 text-sm">Total BTC</p>
-                  <p className="text-2xl font-bold text-orange-500">
-                    {BitcoinService.formatBtc(metrics.totalBtc)} BTC
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-400 text-sm">Total Sats</p>
-                  <p className="text-xl font-semibold text-white">
-                    {BitcoinService.formatSats(metrics.totalSats)} sats
-                  </p>
-                </div>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-slate-400 text-sm">USD Value</p>
-                  <p className="text-2xl font-bold text-white">
-                    {BitcoinService.formatUsd(metrics.btcValueUsd)}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Sovereignty Ratios Card */}
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Sovereignty Ratios</h3>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-slate-400 text-sm">Crypto Ratio</p>
-                  <p className="text-2xl font-bold text-orange-500">
-                    {metrics.sovereigntyRatio.toFixed(2)}x
-                  </p>
-                  <p className="text-slate-500 text-xs mt-1">
-                    BTC value / Annual fixed expenses
-                  </p>
+              {/* Metrics Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {/* Bitcoin Holdings Card */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Bitcoin className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Bitcoin Holdings</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-slate-400 text-sm">Total BTC</p>
+                      <p className="text-2xl font-bold text-orange-500">
+                        {BitcoinService.formatBtc(metrics.totalBtc)} BTC
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Total Sats</p>
+                      <p className="text-xl font-semibold text-white">
+                        {BitcoinService.formatSats(metrics.totalSats)} sats
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-700 pt-3">
+                      <p className="text-slate-400 text-sm">USD Value</p>
+                      <p className="text-2xl font-bold text-white">
+                        {BitcoinService.formatUsd(metrics.btcValueUsd)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-slate-400 text-sm">Full Sovereignty Ratio</p>
-                  <p className="text-2xl font-bold text-white">
-                    {metrics.fullSovereigntyRatio.toFixed(2)}x
-                  </p>
-                  <p className="text-slate-500 text-xs mt-1">
-                    Net worth / Annual total expenses
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Expenses Card */}
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-4">
-                <DollarSign className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Expenses</h3>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-slate-400 text-sm">Monthly Fixed</p>
-                  <p className="text-xl font-semibold text-white">
-                    {BitcoinService.formatUsd(metrics.monthlyFixedExpenses)}
-                  </p>
+                {/* Sovereignty Ratios Card */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Shield className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Sovereignty Ratios</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-slate-400 text-sm">Crypto Ratio</p>
+                      <p className="text-2xl font-bold text-orange-500">
+                        {metrics.sovereigntyRatio.toFixed(2)}x
+                      </p>
+                      <p className="text-slate-500 text-xs mt-1">
+                        BTC value / Annual fixed expenses
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-700 pt-3">
+                      <p className="text-slate-400 text-sm">Full Sovereignty Ratio</p>
+                      <p className="text-2xl font-bold text-white">
+                        {metrics.fullSovereigntyRatio.toFixed(2)}x
+                      </p>
+                      <p className="text-slate-500 text-xs mt-1">
+                        Net worth / Annual total expenses
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-slate-400 text-sm">Monthly Variable</p>
-                  <p className="text-xl font-semibold text-white">
-                    {BitcoinService.formatUsd(metrics.monthlyVariableExpenses)}
-                  </p>
-                </div>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-slate-400 text-sm">Annual Total</p>
-                  <p className="text-2xl font-bold text-orange-500">
-                    {BitcoinService.formatUsd(metrics.annualTotalExpenses)}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Net Worth Card */}
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Net Worth</h3>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-slate-400 text-sm">Bitcoin Value</p>
-                  <p className="text-xl font-semibold text-orange-500">
-                    {BitcoinService.formatUsd(metrics.btcValueUsd)}
-                  </p>
+                {/* Expenses Card */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <DollarSign className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Expenses</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-slate-400 text-sm">Monthly Fixed</p>
+                      <p className="text-xl font-semibold text-white">
+                        {BitcoinService.formatUsd(metrics.monthlyFixedExpenses)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Monthly Variable</p>
+                      <p className="text-xl font-semibold text-white">
+                        {BitcoinService.formatUsd(metrics.monthlyVariableExpenses)}
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-700 pt-3">
+                      <p className="text-slate-400 text-sm">Annual Total</p>
+                      <p className="text-2xl font-bold text-orange-500">
+                        {BitcoinService.formatUsd(metrics.annualTotalExpenses)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-slate-400 text-sm">Other Assets</p>
-                  <p className="text-xl font-semibold text-white">
-                    {BitcoinService.formatUsd(metrics.otherAssetsUsd)}
-                  </p>
-                </div>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-slate-400 text-sm">Total Net Worth</p>
-                  <p className="text-3xl font-bold text-white">
-                    {BitcoinService.formatUsd(metrics.totalNetWorth)}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Years of Runway Card */}
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Runway Analysis</h3>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-slate-400 text-sm">Years of Runway</p>
-                  <p className="text-4xl font-bold text-orange-500">
-                    {metrics.yearsOfRunway.toFixed(1)}
-                  </p>
-                  <p className="text-slate-500 text-xs mt-2">
-                    How many years you can maintain your lifestyle
-                  </p>
+                {/* Net Worth Card */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TrendingUp className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Net Worth</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-slate-400 text-sm">Bitcoin Value</p>
+                      <p className="text-xl font-semibold text-orange-500">
+                        {BitcoinService.formatUsd(metrics.btcValueUsd)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Other Assets</p>
+                      <p className="text-xl font-semibold text-white">
+                        {BitcoinService.formatUsd(metrics.otherAssetsUsd)}
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-700 pt-3">
+                      <p className="text-slate-400 text-sm">Total Net Worth</p>
+                      <p className="text-3xl font-bold text-white">
+                        {BitcoinService.formatUsd(metrics.totalNetWorth)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="border-t border-slate-700 pt-3">
-                  <p className="text-slate-400 text-sm">Next Status</p>
-                  <p className="text-sm text-slate-300">
-                    {metrics.yearsOfRunway >= 20 ? (
-                      'Maximum sovereignty achieved! 🎉'
-                    ) : metrics.yearsOfRunway >= 6 ? (
-                      `${(20 - metrics.yearsOfRunway).toFixed(1)} more years to Generational`
-                    ) : metrics.yearsOfRunway >= 3 ? (
-                      `${(6 - metrics.yearsOfRunway).toFixed(1)} more years to Antifragile`
-                    ) : metrics.yearsOfRunway >= 1 ? (
-                      `${(3 - metrics.yearsOfRunway).toFixed(1)} more years to Robust`
-                    ) : (
-                      `${(1 - metrics.yearsOfRunway).toFixed(1)} more years to Fragile`
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Investment History */}
-          {investmentHistory.length > 0 && (
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <div className="flex items-center gap-3 mb-6">
-                <Calendar className="w-6 h-6 text-orange-500" />
-                <h3 className="text-xl font-semibold text-white">Recent Investments</h3>
+                {/* Years of Runway Card */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Target className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Runway Analysis</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-slate-400 text-sm">Years of Runway</p>
+                      <p className="text-4xl font-bold text-orange-500">
+                        {metrics.yearsOfRunway.toFixed(1)}
+                      </p>
+                      <p className="text-slate-500 text-xs mt-2">
+                        How many years you can maintain your lifestyle
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-700 pt-3">
+                      <p className="text-slate-400 text-sm">Next Status</p>
+                      <p className="text-sm text-slate-300">
+                        {metrics.yearsOfRunway >= 20 ? (
+                          'Maximum sovereignty achieved! 🎉'
+                        ) : metrics.yearsOfRunway >= 6 ? (
+                          `${(20 - metrics.yearsOfRunway).toFixed(1)} more years to Generational`
+                        ) : metrics.yearsOfRunway >= 3 ? (
+                          `${(6 - metrics.yearsOfRunway).toFixed(1)} more years to Antifragile`
+                        ) : metrics.yearsOfRunway >= 1 ? (
+                          `${(3 - metrics.yearsOfRunway).toFixed(1)} more years to Robust`
+                        ) : (
+                          `${(1 - metrics.yearsOfRunway).toFixed(1)} more years to Fragile`
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700">
-                      <th className="text-left text-slate-400 font-medium pb-3">Date</th>
-                      <th className="text-right text-slate-400 font-medium pb-3">Amount USD</th>
-                      <th className="text-right text-slate-400 font-medium pb-3">BTC Price</th>
-                      <th className="text-right text-slate-400 font-medium pb-3">BTC Purchased</th>
-                      <th className="text-right text-slate-400 font-medium pb-3">Sats</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {investmentHistory.map((investment) => (
-                      <tr key={investment.id} className="border-b border-slate-700/50">
-                        <td className="py-3 text-slate-300">
-                          {formatDateForDisplay(investment.investment_date)}
-                        </td>
-                        <td className="py-3 text-right text-white font-medium">
-                          {BitcoinService.formatUsd(investment.amount_usd)}
-                        </td>
-                        <td className="py-3 text-right text-slate-400">
-                          {BitcoinService.formatUsd(investment.btc_price_at_purchase)}
-                        </td>
-                        <td className="py-3 text-right text-orange-500 font-medium">
-                          {BitcoinService.formatBtc(investment.btc_purchased)}
-                        </td>
-                        <td className="py-3 text-right text-slate-300">
-                          {BitcoinService.formatSats(investment.sats_purchased)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+              {/* Investment History */}
+              {investmentHistory.length > 0 && (
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Calendar className="w-6 h-6 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-white">Recent Investments</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-slate-700">
+                          <th className="text-left text-slate-400 font-medium pb-3">Date</th>
+                          <th className="text-right text-slate-400 font-medium pb-3">Amount USD</th>
+                          <th className="text-right text-slate-400 font-medium pb-3">BTC Price</th>
+                          <th className="text-right text-slate-400 font-medium pb-3">BTC Purchased</th>
+                          <th className="text-right text-slate-400 font-medium pb-3">Sats</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {investmentHistory.map((investment) => (
+                          <tr key={investment.id} className="border-b border-slate-700/50">
+                            <td className="py-3 text-slate-300">
+                              {formatDateForDisplay(investment.investment_date)}
+                            </td>
+                            <td className="py-3 text-right text-white font-medium">
+                              {BitcoinService.formatUsd(investment.amount_usd)}
+                            </td>
+                            <td className="py-3 text-right text-slate-400">
+                              {BitcoinService.formatUsd(investment.btc_price_at_purchase)}
+                            </td>
+                            <td className="py-3 text-right text-orange-500 font-medium">
+                              {BitcoinService.formatBtc(investment.btc_purchased)}
+                            </td>
+                            <td className="py-3 text-right text-slate-300">
+                              {BitcoinService.formatSats(investment.sats_purchased)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State for No Investments */}
+              {investmentHistory.length === 0 && (
+                <div className="bg-slate-800 rounded-lg p-8 border border-slate-700 text-center">
+                  <Bitcoin className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-white mb-2">No Investments Recorded</h3>
+                  <p className="text-slate-400 mb-6">
+                    Start stacking sats to build your sovereignty. Track your Bitcoin investments to see your progress.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab('assets')}
+                    className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Update Assets & Expenses
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Tab Content - Assets */}
+          {activeTab === 'assets' && (
+            <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
+              <AssetInputForm />
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => {
+                    refreshMetrics();
+                    setActiveTab('overview');
+                  }}
+                  className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Save & View Overview
+                </button>
               </div>
             </div>
           )}
 
-          {/* Empty State for No Investments */}
-          {investmentHistory.length === 0 && (
-            <div className="bg-slate-800 rounded-lg p-8 border border-slate-700 text-center">
-              <Bitcoin className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Investments Recorded</h3>
-              <p className="text-slate-400 mb-6">
-                Start stacking sats to build your sovereignty. Track your Bitcoin investments to see your progress.
-              </p>
-              <Link
-                href="/app/settings"
-                className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-              >
-                Update Financial Info
-              </Link>
+          {/* Tab Content - Expenses */}
+          {activeTab === 'expenses' && (
+            <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
+              <ExpenseInputForm />
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => {
+                    refreshMetrics();
+                    setActiveTab('overview');
+                  }}
+                  className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Save & View Overview
+                </button>
+              </div>
             </div>
           )}
         </div>

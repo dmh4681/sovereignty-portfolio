@@ -19,6 +19,15 @@ interface RawResponse {
   motivationBoost?: string;
 }
 
+interface CoachingAction {
+  action_type: string;
+  completed_at: string;
+}
+
+interface CoachingFavorite {
+  id: string;
+}
+
 interface CoachingSession {
   id: string;
   created_at: string;
@@ -27,6 +36,8 @@ interface CoachingSession {
   raw_response: RawResponse;
   recommendation: string;
   message: string;
+  coaching_actions?: CoachingAction[];
+  coaching_favorites?: CoachingFavorite[];
 }
 
 interface CoachingHistoryProps {
@@ -231,7 +242,7 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
 
               <div className="flex items-center gap-3">
                 {/* Show if completed */}
-                {(session as any).coaching_actions && (session as any).coaching_actions.length > 0 && (
+                {session.coaching_actions && session.coaching_actions.length > 0 && (
                   <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded">
                     <span>✓</span>
                     <span>Done</span>
@@ -239,7 +250,7 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
                 )}
 
                 {/* Show if favorited */}
-                {(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 && (
+                {session.coaching_favorites && session.coaching_favorites.length > 0 && (
                   <span className="text-yellow-500 text-lg">⭐</span>
                 )}
 
@@ -346,14 +357,14 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
                   {/* Mark as Done Button */}
                   <button
                     onClick={() => handleMarkAsDone(session.id)}
-                    disabled={(session as any).coaching_actions && (session as any).coaching_actions.length > 0}
+                    disabled={session.coaching_actions && session.coaching_actions.length > 0}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
-                      (session as any).coaching_actions && (session as any).coaching_actions.length > 0
+                      session.coaching_actions && session.coaching_actions.length > 0
                         ? 'bg-green-600 text-white cursor-not-allowed'
                         : 'bg-slate-700 text-white hover:bg-slate-600'
                     }`}
                   >
-                    {(session as any).coaching_actions && (session as any).coaching_actions.length > 0 ? (
+                    {session.coaching_actions && session.coaching_actions.length > 0 ? (
                       <>
                         <span>✓</span>
                         <span>Completed</span>
@@ -370,13 +381,13 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
                   <button
                     onClick={() => handleToggleFavorite(session.id)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
-                      (session as any).coaching_favorites && (session as any).coaching_favorites.length > 0
+                      session.coaching_favorites && session.coaching_favorites.length > 0
                         ? 'bg-yellow-600 text-white hover:bg-yellow-500'
                         : 'bg-slate-700 text-white hover:bg-slate-600'
                     }`}
                   >
-                    <span className="text-lg">{(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 ? '⭐' : '☆'}</span>
-                    <span>{(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 ? 'Favorited' : 'Favorite'}</span>
+                    <span className="text-lg">{session.coaching_favorites && session.coaching_favorites.length > 0 ? '⭐' : '☆'}</span>
+                    <span>{session.coaching_favorites && session.coaching_favorites.length > 0 ? 'Favorited' : 'Favorite'}</span>
                   </button>
                 </div>
               </div>

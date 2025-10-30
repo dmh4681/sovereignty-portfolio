@@ -370,7 +370,7 @@ function detectPsychology(entries: DailyEntry[], metrics: ReturnType<typeof calc
   const { riskFactors, strengthAreas } = identifyRisksAndStrengths(entries, metrics, selectedPath);
 
   // Generate motivation indicators
-  const motivationIndicators = generateMotivationIndicators(motivationState, metrics);
+  const motivationIndicators = generateMotivationIndicators(motivationState);
 
   return {
     motivationState,
@@ -604,7 +604,7 @@ function identifyRisksAndStrengths(entries: DailyEntry[], metrics: ReturnType<ty
   return { riskFactors, strengthAreas };
 }
 
-function generateMotivationIndicators(motivationState: MotivationState, _metrics: ReturnType<typeof calculateMetrics>): string[] {
+function generateMotivationIndicators(motivationState: MotivationState): string[] {
   const indicators: string[] = [];
 
   switch (motivationState) {
