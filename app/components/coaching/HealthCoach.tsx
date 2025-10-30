@@ -43,6 +43,9 @@ export default function HealthCoach({ userId }: HealthCoachProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<string>('30d');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const getCoaching = async () => {
     setLoading(true);
@@ -63,6 +66,9 @@ export default function HealthCoach({ userId }: HealthCoachProps) {
       const data = await response.json();
       setCoaching(data.coaching);
       setMetadata(data.metadata);
+      setSessionId(data.sessionId || null);
+      setIsCompleted(false); // Reset for new coaching
+      setIsFavorited(false); // Reset for new coaching
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       console.error('Health coaching error:', err);
@@ -79,6 +85,52 @@ export default function HealthCoach({ userId }: HealthCoachProps) {
       struggling: 'text-red-600',
     };
     return colors[state] || 'text-gray-600';
+  };
+
+  const markAsDone = async () => {
+    if (!sessionId || !userId) return;
+
+    try {
+      const response = await fetch('/api/coaching/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          actionType: 'completed',
+          userId
+        }),
+      });
+
+      if (response.ok) {
+        setIsCompleted(true);
+        console.log('✅ Marked health coaching as completed');
+      }
+    } catch (error) {
+      console.error('❌ Error marking as done:', error);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!sessionId || !userId) return;
+
+    try {
+      const response = await fetch('/api/coaching/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          userId
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFavorited(data.favorited);
+        console.log(data.favorited ? '⭐ Favorited' : '☆ Unfavorited');
+      }
+    } catch (error) {
+      console.error('❌ Error toggling favorite:', error);
+    }
   };
 
   return (
@@ -143,9 +195,45 @@ export default function HealthCoach({ userId }: HealthCoachProps) {
       {/* Coaching Response */}
       {coaching && metadata && (
         <div id="health-coaching-container" className="space-y-6">
-          {/* Share Button */}
-          <div className="flex justify-end">
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3">
             <ShareCoaching coaching={coaching} metadata={metadata} coachType="health" />
+
+            {/* Mark as Done Button */}
+            <button
+              onClick={markAsDone}
+              disabled={isCompleted}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isCompleted
+                  ? 'bg-green-600 text-white cursor-not-allowed'
+                  : 'bg-slate-700 text-white hover:bg-slate-600'
+              }`}
+            >
+              {isCompleted ? (
+                <>
+                  <span>✓</span>
+                  <span>Completed</span>
+                </>
+              ) : (
+                <>
+                  <span>○</span>
+                  <span>Mark as Done</span>
+                </>
+              )}
+            </button>
+
+            {/* Favorite Button */}
+            <button
+              onClick={toggleFavorite}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isFavorited
+                  ? 'bg-yellow-600 text-white hover:bg-yellow-500'
+                  : 'bg-slate-700 text-white hover:bg-slate-600'
+              }`}
+            >
+              <span className="text-lg">{isFavorited ? '⭐' : '☆'}</span>
+              <span>{isFavorited ? 'Favorited' : 'Favorite'}</span>
+            </button>
           </div>
 
           {/* Metadata Bar */}

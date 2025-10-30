@@ -54,7 +54,16 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
 
       const { data, error: fetchError } = await supabase
         .from('coaching_sessions')
-        .select('*')
+        .select(`
+          *,
+          coaching_actions (
+            action_type,
+            completed_at
+          ),
+          coaching_favorites (
+            id
+          )
+        `)
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -63,7 +72,7 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
         throw fetchError;
       }
 
-      console.log('📚 Fetched coaching history:', data);
+      console.log('📚 Fetched coaching history with actions:', data);
       setSessions(data || []);
     } catch (err) {
       console.error('Error fetching coaching history:', err);
@@ -94,6 +103,56 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
     if (trend === 'up') return '📈';
     if (trend === 'down') return '📉';
     return '➡️';
+  };
+
+  const handleMarkAsDone = async (sessionId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const response = await fetch('/api/coaching/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          actionType: 'completed',
+          userId: session.user.id
+        }),
+      });
+
+      if (response.ok) {
+        console.log('✅ Marked session as completed');
+        // Refresh history to show updated badge
+        fetchHistory();
+      }
+    } catch (error) {
+      console.error('❌ Error marking as done:', error);
+    }
+  };
+
+  const handleToggleFavorite = async (sessionId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const response = await fetch('/api/coaching/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          userId: session.user.id
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.favorited ? '⭐ Favorited' : '☆ Unfavorited');
+        // Refresh history to show updated badge
+        fetchHistory();
+      }
+    } catch (error) {
+      console.error('❌ Error toggling favorite:', error);
+    }
   };
 
   if (loading) {
@@ -171,8 +230,21 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
               </div>
 
               <div className="flex items-center gap-3">
+                {/* Show if completed */}
+                {(session as any).coaching_actions && (session as any).coaching_actions.length > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-600/20 text-green-400 text-xs rounded">
+                    <span>✓</span>
+                    <span>Done</span>
+                  </span>
+                )}
+
+                {/* Show if favorited */}
+                {(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 && (
+                  <span className="text-yellow-500 text-lg">⭐</span>
+                )}
+
                 <span className="text-xs text-slate-500 hidden sm:block">
-                  {session.recommendation ? '✓ Recommendation given' : 'No recommendation'}
+                  {session.recommendation ? 'Recommendation given' : 'No recommendation'}
                 </span>
                 {expandedId === session.id ? (
                   <ChevronUp className="h-5 w-5 text-slate-400" />
@@ -268,6 +340,45 @@ export default function CoachingHistory({ refreshTrigger = 0 }: CoachingHistoryP
                     </p>
                   </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+                  {/* Mark as Done Button */}
+                  <button
+                    onClick={() => handleMarkAsDone(session.id)}
+                    disabled={(session as any).coaching_actions && (session as any).coaching_actions.length > 0}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
+                      (session as any).coaching_actions && (session as any).coaching_actions.length > 0
+                        ? 'bg-green-600 text-white cursor-not-allowed'
+                        : 'bg-slate-700 text-white hover:bg-slate-600'
+                    }`}
+                  >
+                    {(session as any).coaching_actions && (session as any).coaching_actions.length > 0 ? (
+                      <>
+                        <span>✓</span>
+                        <span>Completed</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>○</span>
+                        <span>Mark as Done</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Favorite Button */}
+                  <button
+                    onClick={() => handleToggleFavorite(session.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm ${
+                      (session as any).coaching_favorites && (session as any).coaching_favorites.length > 0
+                        ? 'bg-yellow-600 text-white hover:bg-yellow-500'
+                        : 'bg-slate-700 text-white hover:bg-slate-600'
+                    }`}
+                  >
+                    <span className="text-lg">{(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 ? '⭐' : '☆'}</span>
+                    <span>{(session as any).coaching_favorites && (session as any).coaching_favorites.length > 0 ? 'Favorited' : 'Favorite'}</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

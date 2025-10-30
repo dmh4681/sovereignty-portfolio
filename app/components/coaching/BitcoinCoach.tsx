@@ -53,6 +53,9 @@ export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState<'7d' | '30d' | '90d' | 'year' | 'all'>('30d');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // Memoize Supabase client to prevent Multiple GoTrueClient instances
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -107,6 +110,9 @@ export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
       console.log('✅ Coaching received successfully');
       setCoaching(data.coaching);
       setMetadata(data.metadata);
+      setSessionId((data as any).sessionId || null);
+      setIsCompleted(false); // Reset for new coaching
+      setIsFavorited(false); // Reset for new coaching
 
       // Trigger history refresh callback
       if (onNewCoaching) {
@@ -134,6 +140,58 @@ export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
       case 'burnout': return 'text-red-600';
       case 'rebuilding': return 'text-purple-600';
       default: return 'text-gray-600';
+    }
+  };
+
+  const markAsDone = async () => {
+    if (!sessionId) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const response = await fetch('/api/coaching/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          actionType: 'completed',
+          userId: session.user.id
+        }),
+      });
+
+      if (response.ok) {
+        setIsCompleted(true);
+        console.log('✅ Marked coaching as completed');
+      }
+    } catch (error) {
+      console.error('❌ Error marking as done:', error);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!sessionId) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const response = await fetch('/api/coaching/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          userId: session.user.id
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFavorited(data.favorited);
+        console.log(data.favorited ? '⭐ Favorited' : '☆ Unfavorited');
+      }
+    } catch (error) {
+      console.error('❌ Error toggling favorite:', error);
     }
   };
 
@@ -205,9 +263,45 @@ export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
       {/* Coaching Response */}
       {coaching && metadata && (
         <div id="coaching-container" className="space-y-6">
-          {/* Share Button */}
-          <div className="flex justify-end">
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3">
             <ShareCoaching coaching={coaching} metadata={metadata} />
+
+            {/* Mark as Done Button */}
+            <button
+              onClick={markAsDone}
+              disabled={isCompleted}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isCompleted
+                  ? 'bg-green-600 text-white cursor-not-allowed'
+                  : 'bg-slate-700 text-white hover:bg-slate-600'
+              }`}
+            >
+              {isCompleted ? (
+                <>
+                  <span>✓</span>
+                  <span>Completed</span>
+                </>
+              ) : (
+                <>
+                  <span>○</span>
+                  <span>Mark as Done</span>
+                </>
+              )}
+            </button>
+
+            {/* Favorite Button */}
+            <button
+              onClick={toggleFavorite}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isFavorited
+                  ? 'bg-yellow-600 text-white hover:bg-yellow-500'
+                  : 'bg-slate-700 text-white hover:bg-slate-600'
+              }`}
+            >
+              <span className="text-lg">{isFavorited ? '⭐' : '☆'}</span>
+              <span>{isFavorited ? 'Favorited' : 'Favorite'}</span>
+            </button>
           </div>
 
           {/* Metadata Bar */}

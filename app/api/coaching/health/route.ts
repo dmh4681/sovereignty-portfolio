@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
 
     // Store in database using service role to bypass RLS
     console.log('💾 Storing health coaching session...');
+    let sessionId = null;
     try {
       const { createServerClient } = await import('@supabase/ssr');
 
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
         console.error('❌ Failed to store coaching session:', insertError);
       } else {
         console.log('✅ Health coaching session stored with ID:', savedSession?.id);
+        sessionId = savedSession?.id;
       }
     } catch (dbError) {
       console.error('💥 Database save failed:', dbError);
@@ -130,6 +132,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       coaching: coachingResponse,
+      sessionId,
       metadata: {
         coachType: 'health',
         timeRange,
