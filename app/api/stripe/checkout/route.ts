@@ -76,17 +76,9 @@ export async function POST(request: Request) {
 
     console.log('Checkout session created:', session.id);
 
-    // Optimistically update subscription status (webhook will confirm later)
-    // This makes it work in dev without webhooks
-    await supabase
-      .from('profiles')
-      .update({
-        subscription_tier: 'premium',
-        subscription_status: 'active',
-      })
-      .eq('id', userId);
-
-    console.log('Optimistically updated user to premium');
+    // SECURITY: Subscription status is ONLY updated by webhook handler
+    // to ensure payment is confirmed before granting access.
+    // Do NOT update subscription_tier or subscription_status here.
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
