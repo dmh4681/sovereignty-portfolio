@@ -26,6 +26,7 @@ export default function ExpenseInputForm() {
 
   useEffect(() => {
     initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeAuth = async () => {

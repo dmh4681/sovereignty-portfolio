@@ -312,7 +312,7 @@ export default function SovereigntyOverview() {
           )}
           {calculation.yearsOfRunway >= 6 && (
             <>
-              <li>• You're on the path to true sovereignty</li>
+              <li>• You&apos;re on the path to true sovereignty</li>
               <li>• Consider helping others on their journey</li>
               <li>• Focus on sustainability and legacy</li>
             </>

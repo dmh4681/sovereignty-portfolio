@@ -31,6 +31,7 @@ export default function AssetInputForm() {
 
   useEffect(() => {
     initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeAuth = async () => {
@@ -135,7 +136,7 @@ export default function AssetInputForm() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Notes (e.g., "170,815 ALGO")
+              Notes (e.g., &ldquo;170,815 ALGO&rdquo;)
             </label>
             <input
               type="text"

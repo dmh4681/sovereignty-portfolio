@@ -23,6 +23,12 @@ interface MilestoneProgress {
   encouragement: string;
 }
 
+interface ApiResponse {
+  coaching: CoachingResponse;
+  metadata: CoachingMetadata;
+  sessionId?: string;
+}
+
 interface CoachingResponse {
   message: string;
   insights: string[];
@@ -110,7 +116,7 @@ export default function BitcoinCoach({ onNewCoaching }: BitcoinCoachProps) {
       console.log('✅ Coaching received successfully');
       setCoaching(data.coaching);
       setMetadata(data.metadata);
-      setSessionId((data as any).sessionId || null);
+      setSessionId(data.sessionId || null);
       setIsCompleted(false); // Reset for new coaching
       setIsFavorited(false); // Reset for new coaching
 
