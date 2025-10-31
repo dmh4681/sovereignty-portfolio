@@ -5,10 +5,12 @@ import { Save, Loader } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import type { UserAssets } from '@/types/sovereignty';
 
+type AssetFormData = Omit<UserAssets, 'id' | 'user_id' | 'last_updated' | 'created_at' | 'updated_at' | 'notes'>;
+
 export default function AssetInputForm() {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [userId, setUserId] = useState<string | null>(null);
-  const [assets, setAssets] = useState<UserAssets>({
+  const [assets, setAssets] = useState<AssetFormData>({
     other_crypto_usd: 0,
     other_crypto_notes: '',
     retirement_accounts_usd: 0,
@@ -90,7 +92,7 @@ export default function AssetInputForm() {
     }
   };
 
-  const updateField = (field: keyof UserAssets, value: number | string) => {
+  const updateField = (field: keyof AssetFormData, value: number | string) => {
     setAssets(prev => ({ ...prev, [field]: value }));
   };
 

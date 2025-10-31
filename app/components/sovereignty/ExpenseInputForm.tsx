@@ -5,10 +5,12 @@ import { Save, Loader, Calculator } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import type { UserExpenses } from '@/types/sovereignty';
 
+type ExpenseFormData = Omit<UserExpenses, 'id' | 'user_id' | 'last_updated' | 'created_at' | 'updated_at' | 'notes'>;
+
 export default function ExpenseInputForm() {
   const supabase = useMemo(() => createBrowserClient(), []);
   const [userId, setUserId] = useState<string | null>(null);
-  const [expenses, setExpenses] = useState<UserExpenses>({
+  const [expenses, setExpenses] = useState<ExpenseFormData>({
     housing_annual: 0,
     utilities_annual: 0,
     insurance_annual: 0,
@@ -85,7 +87,7 @@ export default function ExpenseInputForm() {
     }
   };
 
-  const updateField = (field: keyof UserExpenses, value: number) => {
+  const updateField = (field: keyof ExpenseFormData, value: number) => {
     setExpenses(prev => ({ ...prev, [field]: value }));
   };
 
