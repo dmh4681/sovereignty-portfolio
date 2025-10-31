@@ -23,12 +23,6 @@ interface MilestoneProgress {
   encouragement: string;
 }
 
-interface ApiResponse {
-  coaching: CoachingResponse;
-  metadata: CoachingMetadata;
-  sessionId?: string;
-}
-
 interface CoachingResponse {
   message: string;
   insights: string[];
@@ -38,15 +32,18 @@ interface CoachingResponse {
   motivationBoost: string;
 }
 
+interface CoachingMetadata {
+  timeRange: string;
+  daysAnalyzed: number;
+  totalSats: number;
+  motivationState: string;
+}
+
 interface ApiResponse {
   success: boolean;
   coaching: CoachingResponse;
-  metadata: {
-    timeRange: string;
-    daysAnalyzed: number;
-    totalSats: number;
-    motivationState: string;
-  };
+  metadata: CoachingMetadata;
+  sessionId?: string;
 }
 
 interface BitcoinCoachProps {
