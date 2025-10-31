@@ -362,7 +362,16 @@ export default function SovereigntyDashboard() {
                       metrics.yearsOfRunway >= 1 ? 'bg-red-500' :
                       'bg-slate-500'
                     }`}
-                    style={{ width: `${Math.min(metrics.yearsOfRunway / 20 * 100, 100)}%` }}
+                    style={{
+                      width: `${(() => {
+                        const years = metrics.yearsOfRunway;
+                        if (years >= 20) return 75 + Math.min((years - 20) / 20 * 25, 25); // 20+ years = 75-100%
+                        if (years >= 6) return 50 + ((years - 6) / 14) * 25;  // 6-20 years = 50-75%
+                        if (years >= 3) return 37.5 + ((years - 3) / 3) * 12.5; // 3-6 years = 37.5-50%
+                        if (years >= 1) return 25 + ((years - 1) / 2) * 12.5;   // 1-3 years = 25-37.5%
+                        return (years / 1) * 25;                                 // 0-1 year = 0-25%
+                      })()}%`
+                    }}
                   />
                 </div>
 
