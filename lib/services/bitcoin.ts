@@ -2,6 +2,8 @@
  * Bitcoin Service - Handles all Bitcoin price and portfolio operations
  */
 
+import { getCachedBitcoinPrice } from '@/lib/bitcoin/price-cache';
+
 interface BitcoinPrice {
   priceUsd: number;
   timestamp: Date;
@@ -16,46 +18,19 @@ interface BitcoinPurchase {
 }
 
 export class BitcoinService {
-  private static COINBASE_API = 'https://api.coinbase.com/v2/prices/BTC-USD/spot';
-  private static COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd';
   private static SATS_PER_BTC = 100_000_000;
 
   /**
-   * Get current Bitcoin price (with fallback to multiple sources)
+   * Get current Bitcoin price (uses 5-minute cache)
+   * This is the recommended method to use throughout the app
    */
   static async getCurrentPrice(): Promise<BitcoinPrice | null> {
     try {
-      // Try Coinbase first (most reliable)
-      const coinbaseResponse = await fetch(this.COINBASE_API);
-      if (coinbaseResponse.ok) {
-        const data = await coinbaseResponse.json();
-        return {
-          priceUsd: parseFloat(data.data.amount),
-          timestamp: new Date(),
-          source: 'coinbase'
-        };
-      }
-    } catch {
-      console.warn('Coinbase API failed, trying CoinGecko...');
-    }
-
-    try {
-      // Fallback to CoinGecko
-      const coingeckoResponse = await fetch(this.COINGECKO_API);
-      if (coingeckoResponse.ok) {
-        const data = await coingeckoResponse.json();
-        return {
-          priceUsd: data.bitcoin.usd,
-          timestamp: new Date(),
-          source: 'coingecko'
-        };
-      }
+      return await getCachedBitcoinPrice();
     } catch (error) {
-      console.error('All Bitcoin price APIs failed:', error);
+      console.error('Failed to get Bitcoin price:', error);
       return null;
     }
-
-    return null;
   }
 
   /**

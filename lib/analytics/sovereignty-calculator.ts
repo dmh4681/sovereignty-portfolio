@@ -31,16 +31,13 @@ export interface SovereigntyMetrics {
 }
 
 export class SovereigntyCalculator {
+  /**
+   * Get Bitcoin price (uses cached price from BitcoinService)
+   * @deprecated Use BitcoinService.getCurrentPrice() directly
+   */
   static async getBitcoinPrice(): Promise<number | null> {
-    try {
-      const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC');
-      const data = await response.json();
-      const usdRate = parseFloat(data.data.rates.USD);
-      return usdRate;
-    } catch (error) {
-      console.error('Error fetching Bitcoin price:', error);
-      return null;
-    }
+    const priceData = await BitcoinService.getCurrentPrice();
+    return priceData?.priceUsd || null;
   }
 
   static async calculateMetrics(userId: string): Promise<SovereigntyMetrics | null> {
